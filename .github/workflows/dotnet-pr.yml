@@ -17,7 +17,17 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore CarWorkshopManager
 
-      - name: Run CarWorkshopManager for 10 seconds (graceful stop)
-        working-directory: CarWorkshopManager
+      - name: Build project
+        run: dotnet build CarWorkshopManager --configuration Release
+
+      - name: Run CarWorkshopManager in background
         run: |
-          timeout --preserve-status --signal=INT 10s dotnet run
+          dotnet run --project CarWorkshopManager --configuration Release &
+          echo $! > cwm_pid.txt
+
+      - name: Wait for startup
+        run: sleep 10
+
+      - name: Stop CarWorkshopManager
+        if: always()
+        run: kill $(cat cwm_pid.txt) || true
