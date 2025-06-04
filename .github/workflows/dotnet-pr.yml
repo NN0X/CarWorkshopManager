@@ -1,0 +1,27 @@
+name: Run CarWorkshopManager on PR
+
+on:
+  pull_request:
+    paths:
+      - 'CarWorkshopManager/**'
+
+jobs:
+  run-dotnet:
+    name: Build and Run CarWorkshopManager
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore CarWorkshopManager
+
+      - name: Run CarWorkshopManager
+        working-directory: CarWorkshopManager
+        run: dotnet run
