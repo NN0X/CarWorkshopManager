@@ -17,6 +17,12 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore CarWorkshopManager
 
-      - name: Run CarWorkshopManager
+      - name: Run CarWorkshopManager for 10 seconds (simulate Ctrl+C)
         working-directory: CarWorkshopManager
-        run: dotnet run
+        run: |
+          dotnet run &
+          pid=$!
+          sleep 10
+          echo "Stopping dotnet run after 10 seconds..."
+          kill -INT $pid
+          wait $pid
