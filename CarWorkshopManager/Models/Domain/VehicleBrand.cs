@@ -9,4 +9,7 @@ public class VehicleBrand
     [Required]
     [MaxLength(50)]
     public string Name { get; set; } = string.Empty;
+    
+    
+    public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 }

@@ -34,4 +34,8 @@ public class Vehicle
     public string? ImageUrl { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+
+    public Customer Customer { get; set; } = null!;
+    public VehicleBrand VehicleBrand { get; set; } = null!;
 }
