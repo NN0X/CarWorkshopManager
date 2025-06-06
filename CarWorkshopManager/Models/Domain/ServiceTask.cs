@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using CarWorkshopManager.Models.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarWorkshopManager.Models.Domain;
@@ -48,4 +49,5 @@ public class ServiceTask
     public WorkRate WorkRate { get; set; } = null!;
     public VatRate VatRate { get; set; } = null!;
     public ICollection<UsedPart> UsedParts { get; set; } = new List<UsedPart>();
+    public ICollection<ApplicationUser> Mechanics { get; set; } = new List<ApplicationUser>();
 }
