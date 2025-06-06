@@ -8,7 +8,7 @@ namespace CarWorkshopManager.Data;
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {}
-    
+
     public DbSet<Customer> Customers { get; set; }
     public DbSet<OrderComment> OrderComments { get; set; }
     public DbSet<OrderStatus> OrderStatuses { get; set; }
@@ -24,7 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        
+
         builder.Entity<Customer>(entity =>
         {
             entity.HasIndex(c => c.Email).IsUnique();
@@ -40,7 +40,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.HasIndex(part => part.Name).IsUnique();
         });
-        
+
         builder.Entity<ServiceOrder>(entity =>
         {
             entity.HasIndex(so => so.OrderNumber).IsUnique();
@@ -71,8 +71,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.HasIndex(wr => wr.Name).IsUnique();
         });
-        
-        
+
+
         builder.Entity<Vehicle>(entity =>
         {
             entity.HasOne(v => v.Customer)
@@ -80,7 +80,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(v => v.CustomerId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<Vehicle>(entity =>
         {
             entity.HasOne(v => v.VehicleBrand)
@@ -88,7 +88,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(v => v.VehicleBrandId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<ServiceOrder>(entity =>
         {
             entity.HasOne(so => so.Customer)
@@ -96,7 +96,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(so => so.CustomerId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<ServiceOrder>(entity =>
         {
             entity.HasOne(so => so.Vehicle)
@@ -104,7 +104,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(so => so.VehicleId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<ServiceOrder>(entity =>
         {
             entity.HasOne(so => so.Status)
@@ -112,7 +112,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(so => so.StatusId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<ServiceOrder>(entity =>
         {
             entity.HasOne(so => so.CreatedBy)
@@ -120,8 +120,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(so => so.CreatedById)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
-        
+
+
         builder.Entity<ServiceTask>(entity =>
         {
             entity.HasOne(st => st.WorkRate)
@@ -129,7 +129,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(st => st.WorkRateId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<ServiceTask>(entity =>
         {
             entity.HasOne(st => st.VatRate)
@@ -137,7 +137,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(st => st.VatRateId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<UsedPart>(entity =>
         {
             entity.HasOne(up => up.Part)
@@ -145,7 +145,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(up => up.PartId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<UsedPart>(entity =>
         {
             entity.HasOne(up => up.VatRate)
@@ -153,7 +153,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(up => up.VatRateId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<WorkRate>(entity =>
         {
             entity.HasOne(wr => wr.VatRate)
@@ -161,7 +161,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(wr => wr.VatRateId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<OrderComment>(entity =>
         {
             entity.HasOne(oc => oc.Author)
