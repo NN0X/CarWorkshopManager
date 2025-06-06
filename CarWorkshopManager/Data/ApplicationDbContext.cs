@@ -71,5 +71,104 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.HasIndex(wr => wr.Name).IsUnique();
         });
+        
+        
+        builder.Entity<Vehicle>(entity =>
+        {
+            entity.HasOne(v => v.Customer)
+                  .WithMany(c => c.Vehicles)
+                  .HasForeignKey(v => v.CustomerId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<Vehicle>(entity =>
+        {
+            entity.HasOne(v => v.VehicleBrand)
+                  .WithMany(vb => vb.Vehicles)
+                  .HasForeignKey(v => v.VehicleBrandId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<ServiceOrder>(entity =>
+        {
+            entity.HasOne(so => so.Customer)
+                  .WithMany()
+                  .HasForeignKey(so => so.CustomerId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<ServiceOrder>(entity =>
+        {
+            entity.HasOne(so => so.Vehicle)
+                  .WithMany()
+                  .HasForeignKey(so => so.VehicleId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<ServiceOrder>(entity =>
+        {
+            entity.HasOne(so => so.Status)
+                  .WithMany()
+                  .HasForeignKey(so => so.StatusId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<ServiceOrder>(entity =>
+        {
+            entity.HasOne(so => so.CreatedBy)
+                  .WithMany()
+                  .HasForeignKey(so => so.CreatedById)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        
+        builder.Entity<ServiceTask>(entity =>
+        {
+            entity.HasOne(st => st.WorkRate)
+                  .WithMany()
+                  .HasForeignKey(st => st.WorkRateId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<ServiceTask>(entity =>
+        {
+            entity.HasOne(st => st.VatRate)
+                  .WithMany()
+                  .HasForeignKey(st => st.VatRateId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<UsedPart>(entity =>
+        {
+            entity.HasOne(up => up.Part)
+                  .WithMany(p => p.UsedParts)
+                  .HasForeignKey(up => up.PartId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<UsedPart>(entity =>
+        {
+            entity.HasOne(up => up.VatRate)
+                  .WithMany()
+                  .HasForeignKey(up => up.VatRateId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<WorkRate>(entity =>
+        {
+            entity.HasOne(wr => wr.VatRate)
+                  .WithMany()
+                  .HasForeignKey(wr => wr.VatRateId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+        
+        builder.Entity<OrderComment>(entity =>
+        {
+            entity.HasOne(oc => oc.Author)
+                  .WithMany()
+                  .HasForeignKey(oc => oc.AuthorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
     }
 }
