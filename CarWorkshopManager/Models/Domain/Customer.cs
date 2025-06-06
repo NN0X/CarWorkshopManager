@@ -5,27 +5,27 @@ namespace CarWorkshopManager.Models.Domain;
 public class Customer
 {
     public int Id { get; set; }
-    
-    [Required] 
+
+    [Required]
     [MaxLength(200)]
     public string FirstName { get; set; } = string.Empty;
-    
-    [Required] 
+
+    [Required]
     [MaxLength(200)]
     public string LastName { get; set; } = string.Empty;
-    
-    [Required] 
-    [Phone] 
+
+    [Required]
+    [Phone]
     [MaxLength(20)]
     public string PhoneNumber { get; set; } = string.Empty;
-    
-    [Required] 
-    [EmailAddress] 
+
+    [Required]
+    [EmailAddress]
     [MaxLength(200)]
     public string Email { get; set; } = string.Empty;
-    
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
-    
+
+
     public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 }
