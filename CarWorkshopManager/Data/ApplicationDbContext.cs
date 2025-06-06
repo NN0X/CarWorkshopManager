@@ -169,6 +169,5 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(oc => oc.AuthorId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-
     }
 }
