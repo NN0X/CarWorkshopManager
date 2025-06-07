@@ -1,0 +1,29 @@
+@model IEnumerable<CarWorkshopManager.Models.Domain.Customer>
+
+<h2>Lista klientów</h2>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Dodaj nowego klienta</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th>Telefon</th>
+            <th>E-mail</th>
+            <th>Data utworzenia</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var c in Model)
+    {
+        <tr>
+            <td>@c.FirstName</td>
+            <td>@c.LastName</td>
+            <td>@c.PhoneNumber</td>
+            <td>@c.Email</td>
+            <td>@c.CreatedAt.ToLocalTime().ToString("g")</td>
+        </tr>
+    }
+    </tbody>
+</table>
