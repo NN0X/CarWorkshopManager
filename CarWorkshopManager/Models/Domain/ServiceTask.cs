@@ -22,17 +22,17 @@ public class ServiceTask
     [Precision(6, 2)] 
     [Range(0, 1000.00)]
     public decimal WorkHours { get; set; }
-
-    // *** Snapshots in case of the rates & VAT change in the future [not a redundancy!] *** //
+    
     [Required]
     [Precision(8, 2)]
     [Range(0.01, 100000.00)]
-    public decimal HourRateNet { get; set; }
+    public decimal HourRateNetSnapshot { get; set; }
 
     [Required]
-    public int VatRateId { get; set; } 
-
-    // *** Frozen totals (to avoid rounding issues) *** //
+    [Precision(4, 2)]
+    [Range(0.00, 1.00)]
+    public decimal VatRateSnapshot { get; set; } 
+    
     [Precision(18, 2)]
     public decimal TotalNet { get; set; }
 
@@ -44,9 +44,9 @@ public class ServiceTask
 
     public DateTime? CompletedAt { get; set; }
 
+    
     public ServiceOrder ServiceOrder { get; set; } = null!;
     public WorkRate WorkRate { get; set; } = null!;
-    public VatRate VatRate { get; set; } = null!;
     public ICollection<UsedPart> UsedParts { get; set; } = new List<UsedPart>();
     public ICollection<ApplicationUser> Mechanics { get; set; } = new List<ApplicationUser>();
 }
