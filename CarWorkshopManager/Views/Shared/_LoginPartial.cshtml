@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using CarWorkshopManager.Models.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                Witaj, @User.Identity.Name!
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                <li>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="px-3 py-1">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-link dropdown-item">Wyloguj</button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Zaloguj się</a>
+        </li>
+    }
+</ul>
