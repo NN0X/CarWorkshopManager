@@ -14,5 +14,8 @@ public class ApplicationUser : IdentityUser
     [MaxLength(200)]
     public string LastName { get; set; } = string.Empty;
 
-    public ICollection<ServiceTask> ServiceTasks { get; set; } = new List<ServiceTask>();
+    
+    public ICollection<ServiceTask> AssignedTasks { get; set; } = new List<ServiceTask>();
+    public ICollection<ServiceOrder> CreatedOrders { get; set; } = new List<ServiceOrder>();
+    public ICollection<OrderComment> OrderComments { get; set; } = new List<OrderComment>();
 }

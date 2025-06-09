@@ -13,7 +13,7 @@ public class Part
 
     [Required]
     [Precision(10, 2)]
-    [Range(0, 10000000)]
+    [Range(0.01, 10000000)]
     public decimal UnitPriceNet { get; set; }
 
     [Required]
@@ -22,6 +22,8 @@ public class Part
     [Required]
     [Range(0, int.MaxValue)]
     public int StockQuantity { get; set; }
+
+    public bool IsActive { get; set; } = true;
 
 
     public VatRate VatRate { get; set; } = null!;
