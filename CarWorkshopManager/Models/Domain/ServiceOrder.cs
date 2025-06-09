@@ -13,15 +13,13 @@ public class ServiceOrder
     public string OrderNumber { get; set; } = string.Empty;
 
     [Required]
-    public int CustomerId { get; set; }
-
-    [Required]
     public int VehicleId { get; set; }
 
     [Required]
     public int StatusId { get; set; }
 
     [Required]
+    [MaxLength(450)]
     public string CreatedById { get; set; } = string.Empty;
 
     [Required]
@@ -29,13 +27,19 @@ public class ServiceOrder
 
     public DateTime? ClosedAt { get; set; }
 
+    [MaxLength(200)] 
+    public string CustomerNameSnapshot { get; set; } = string.Empty;
+
+    [MaxLength(10)]
+    public string RegistrationNumberSnapshot { get; set; } = string.Empty;
+
     [Precision(18, 2)]
     public decimal TotalNet { get; set; }
 
     [Precision(18, 2)]
     public decimal TotalVat { get; set; }
 
-    public Customer Customer { get; set; } = null!;
+
     public Vehicle Vehicle { get; set; } = null!;
     public OrderStatus Status { get; set; } = null!;
     public ApplicationUser? CreatedBy { get; set; }
