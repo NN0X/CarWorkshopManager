@@ -130,7 +130,7 @@ namespace CarWorkshopManager.Migrations
                 table: "Parts",
                 type: "bit",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "ApplicationUserId",
