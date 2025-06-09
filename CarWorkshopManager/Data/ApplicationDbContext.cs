@@ -89,14 +89,15 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        builder.Entity<ServiceOrder>(entity =>
+        builder.Entity<Part>(entity =>
         {
-            entity.HasOne(so => so.Customer)
-                  .WithMany()
-                  .HasForeignKey(so => so.CustomerId)
-                  .OnDelete(DeleteBehavior.Restrict);
-        });
+            entity.HasOne(p => p.VatRate)
+                .WithMany()
+                .HasForeignKey(p => p.VatRateId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+        });
+        
         builder.Entity<ServiceOrder>(entity =>
         {
             entity.HasOne(so => so.Vehicle)
@@ -120,8 +121,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(so => so.CreatedById)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-
-
+        
         builder.Entity<ServiceTask>(entity =>
         {
             entity.HasOne(st => st.WorkRate)
@@ -132,27 +132,28 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<ServiceTask>(entity =>
         {
-            entity.HasOne(st => st.VatRate)
-                  .WithMany()
-                  .HasForeignKey(st => st.VatRateId)
-                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(st => st.ServiceOrder)
+                .WithMany(o => o.Tasks)
+                .HasForeignKey(st => st.ServiceOrderId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
-
+        
         builder.Entity<UsedPart>(entity =>
         {
             entity.HasOne(up => up.Part)
-                  .WithMany(p => p.UsedParts)
-                  .HasForeignKey(up => up.PartId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                .WithMany(p => p.UsedParts)
+                .HasForeignKey(up => up.PartId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         builder.Entity<UsedPart>(entity =>
         {
-            entity.HasOne(up => up.VatRate)
-                  .WithMany()
-                  .HasForeignKey(up => up.VatRateId)
-                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(up => up.ServiceTask)
+                .WithMany(t => t.UsedParts)
+                .HasForeignKey(up => up.ServiceTaskId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
+        
 
         builder.Entity<WorkRate>(entity =>
         {
