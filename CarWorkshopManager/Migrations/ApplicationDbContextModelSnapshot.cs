@@ -192,7 +192,7 @@ namespace CarWorkshopManager.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CustomerNameSnaphot")
+                    b.Property<string>("CustomerNameSnapshot")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
