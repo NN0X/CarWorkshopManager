@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Panel użytkownika";
+}
+
+<h2 class="mt-4">Panel</h2>
+
+@if (User.IsInRole("Admin"))
+{
+    <p><strong>PANEL ADMINISTRATORA</strong></p>
+    <a href="@Url.Action("RegisterUser", "Admin")" class="btn btn-primary">Stwórz nowego użytkownika</a>
+}
+else if (User.IsInRole("Mechanic"))
+{
+    <p><strong>PANEL MECHANIKA</strong></p>
+    <p>Twoje zadania będą widoczne tutaj.</p>
+}
+else if (User.IsInRole("Receptionist"))
+{
+    <p><strong>PANEL RECEPCJONISTY</strong></p>
+    <p>Twoje zadania będą widoczne tutaj.</p>
+}
+else
+{
+    <p>Nie przypisano Ci roli lub nie masz dostępu.</p>
+}

@@ -1,8 +1,17 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "CarWorkshopManager";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex flex-column align-items-center justify-content-center" style="height: 60vh;">
+    <h1 class="display-4 mb-4">Menedżer do zarządzania warsztatem samochodowym</h1>
+    <p class="lead mb-4">Zarządzaj klientami, pojazdami, zleceniami i zadaniami – wszystko w jednym miejscu.</p>
+    
+    @if (!User.Identity?.IsAuthenticated ?? true)
+    {
+        <a class="btn btn-primary btn-lg" asp-controller="Account" asp-action="Login">Zaloguj się</a>
+    }
+    else
+    {
+        <a class="btn btn-success btn-lg" asp-controller="Dashboard" asp-action="Index">Przejdź do panelu</a>
+    }
 </div>
