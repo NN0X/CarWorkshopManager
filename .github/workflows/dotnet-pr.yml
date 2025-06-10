@@ -2,12 +2,10 @@ name: Run CarWorkshopManager on PR
 
 on:
   pull_request:
-    paths:
-      - 'CarWorkshopManager/**'
 
 jobs:
   run-dotnet:
-    name: Build and Run CarWorkshopManager
+    name: Build and Test CarWorkshopManager
     runs-on: [self-hosted, linux]
 
     steps:
@@ -20,14 +18,5 @@ jobs:
       - name: Build project
         run: dotnet build CarWorkshopManager --configuration Release
 
-      - name: Run CarWorkshopManager in background
-        run: |
-          dotnet run --project CarWorkshopManager --configuration Release &
-          echo $! > cwm_pid.txt
-
-      - name: Wait for startup
-        run: sleep 10
-
-      - name: Stop CarWorkshopManager
-        if: always()
-        run: kill $(cat cwm_pid.txt) || true
+      - name: Run tests
+        run: dotnet test CarWorkshopManager --configuration Release --no-build --verbosity normal
