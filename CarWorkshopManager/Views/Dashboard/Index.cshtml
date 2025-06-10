@@ -7,8 +7,13 @@
 @if (User.IsInRole("Admin"))
 {
     <p><strong>PANEL ADMINISTRATORA</strong></p>
-    <a href="@Url.Action("RegisterUser", "Admin")" class="btn btn-primary">Stwórz nowego użytkownika</a>
+    <div class="d-grid gap-2">
+        <a asp-controller="Admin" asp-action="RegisterUser" class="btn btn-primary">Stwórz nowego użytkownika</a>
+        <a asp-controller="Admin" asp-action="EditRoles" class="btn btn-primary">Zmień rolę użytkowników</a>
+        <a asp-controller="Admin" asp-action="Users" class="btn btn-primary">Wyświetl listę użytkowników</a>
+    </div>
 }
+
 else if (User.IsInRole("Mechanic"))
 {
     <p><strong>PANEL MECHANIKA</strong></p>
