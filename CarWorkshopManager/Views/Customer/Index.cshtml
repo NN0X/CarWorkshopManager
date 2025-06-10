@@ -1,0 +1,29 @@
+﻿@model List<CarWorkshopManager.ViewModels.Customer.CustomerListItemViewModel>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Imię i nazwisko</th>
+        <th>Email</th>
+        <th>Telefon</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var customer in Model)
+    {
+        <tr>
+            <td>@customer.Id</td>
+            <td>@customer.FirstName @customer.LastName</td>
+            <td>@customer.Email</td>
+            <td>@customer.PhoneNumber</td>
+            <td>
+                <a asp-controller="Customer" asp-action="Details" asp-route-id="@customer.Id" class="btn btn-primary btn-sm">
+                    Szczegóły
+                </a>
+            </td>
+        </tr>
+    }
+    
+    </tbody>
+</table>

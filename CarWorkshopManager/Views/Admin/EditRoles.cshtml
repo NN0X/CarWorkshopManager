@@ -1,0 +1,49 @@
+﻿@model IEnumerable<CarWorkshopManager.ViewModels.Admin.UserListItemViewModel>
+@{
+    ViewData["Title"] = "Zmiana ról użytkowników";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table table-bordered table-hover mt-3">
+    <thead>
+    <tr>
+        <th>Login</th>
+        <th>Imię i nazwisko</th>
+        <th>Email</th>
+        <th>Rola</th>
+        <th>Akcja</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.Username</td>
+            <td>@user.FullName</td>
+            <td>@user.Email</td>
+            <td>@user.Role</td>
+            <td>
+                <form asp-action="ChangeRole" method="post" class="d-flex align-items-center">
+                    <input type="hidden" name="userId" value="@user.Id" />
+                    <select name="newRole" class="form-select form-select-sm me-2">
+                        <option value="Admin" selected="@(user.Role == "Admin")">Admin</option>
+                        <option value="Mechanic" selected="@(user.Role == "Mechanic")">Mechanik</option>
+                        <option value="Receptionist" selected="@(user.Role == "Receptionist")">Recepcjonista</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary">Zapisz</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

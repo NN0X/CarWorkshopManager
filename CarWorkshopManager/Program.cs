@@ -1,4 +1,5 @@
 using CarWorkshopManager.Data;
+using CarWorkshopManager.Mappers;
 using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Implementations;
 using CarWorkshopManager.Services.Interfaces;
@@ -28,8 +29,12 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddSingleton<CustomerMapper>();
 builder.Services.AddScoped<IUsernameGeneratorService, UsernameGeneratorService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
 
 var app = builder.Build();
 

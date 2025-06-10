@@ -1,0 +1,68 @@
+﻿@model CarWorkshopManager.ViewModels.Customer.CustomerDetailsViewModel
+@{
+    ViewData["Title"] = "Szczegóły klienta";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<dl class="row">
+    <dt class="col-sm-3">Imię i nazwisko</dt>
+    <dd class="col-sm-9">@Model.FirstName @Model.LastName</dd>
+
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">@Model.Email</dd>
+
+    <dt class="col-sm-3">Telefon</dt>
+    <dd class="col-sm-9">@Model.PhoneNumber</dd>
+</dl>
+
+<a asp-controller="Vehicle"
+   asp-action="Add"
+   asp-route-customerId="@Model.Id"
+   class="btn btn-success mb-3">
+    Dodaj pojazd
+</a>
+
+@if (!Model.Vehicles.Any())
+{
+    <p>Klient nie ma jeszcze pojazdów.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Marka</th>
+            <th>Model</th>
+            <th>VIN</th>
+            <th>Numer rejestracyjny</th>
+            <th>Rok</th>
+            <th>Przebieg (km)</th>
+            <th>Dodano</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var v in Model.Vehicles)
+        {
+            <tr>
+                <td>@v.BrandName</td>
+                <td>@v.Model</td>
+                <td>@v.Vin</td>
+                <td>@v.RegistrationNumber</td>
+                <td>@v.ProductionYear</td>
+                <td>@v.Mileage</td>
+                <td>@v.CreatedAt.ToString("yyyy-MM-dd")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
