@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarWorkshopManager", "CarWorkshopManager\CarWorkshopManager.csproj", "{3227355D-2CB6-4112-80D5-845FDBE4F92C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarWorkshopManager.Tests", "CarWorkshopManager.Tests\CarWorkshopManager.Tests.csproj", "{A107A0CE-A5BE-4491-B2B8-AE3D111D898C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{3227355D-2CB6-4112-80D5-845FDBE4F92C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3227355D-2CB6-4112-80D5-845FDBE4F92C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3227355D-2CB6-4112-80D5-845FDBE4F92C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A107A0CE-A5BE-4491-B2B8-AE3D111D898C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A107A0CE-A5BE-4491-B2B8-AE3D111D898C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A107A0CE-A5BE-4491-B2B8-AE3D111D898C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A107A0CE-A5BE-4491-B2B8-AE3D111D898C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
