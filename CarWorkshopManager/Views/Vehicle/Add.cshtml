@@ -1,0 +1,65 @@
+﻿@model CarWorkshopManager.ViewModels.Vehicle.AddVehicleViewModel
+@{
+    ViewData["Title"] = "Dodaj pojazd";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form asp-action="Add" method="post">
+    @Html.AntiForgeryToken()
+    
+    <input type="hidden" asp-for="CustomerId" />
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Brand" class="form-label"></label>
+        <input asp-for="Brand" class="form-control" />
+        <span asp-validation-for="Brand" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Model" class="form-label"></label>
+        <input asp-for="Model" class="form-control" />
+        <span asp-validation-for="Model" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Vin" class="form-label"></label>
+        <input asp-for="Vin" class="form-control" />
+        <span asp-validation-for="Vin" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="RegistrationNumber" class="form-label"></label>
+        <input asp-for="RegistrationNumber" class="form-control" />
+        <span asp-validation-for="RegistrationNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Year" class="form-label"></label>
+        <input asp-for="Year" type="number" class="form-control" />
+        <span asp-validation-for="Year" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Mileage" class="form-label"></label>
+        <input asp-for="Mileage" type="number" class="form-control" />
+        <span asp-validation-for="Mileage" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Dodaj pojazd</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

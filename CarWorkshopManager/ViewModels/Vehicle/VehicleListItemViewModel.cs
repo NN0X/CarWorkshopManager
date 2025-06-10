@@ -1,0 +1,12 @@
+﻿namespace CarWorkshopManager.ViewModels.Vehicle;
+
+public class VehicleListItemViewModel
+{
+    public string BrandName { get; set; } = string.Empty;
+    public string Model { get; set; } = string.Empty;
+    public string Vin { get; set; } = string.Empty;
+    public string RegistrationNumber { get; set; } = string.Empty;
+    public int ProductionYear { get; set; }
+    public int Mileage { get; set; }
+    public DateTime CreatedAt { get; set; }
+}

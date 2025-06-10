@@ -1,0 +1,30 @@
+﻿@model IEnumerable<CarWorkshopManager.ViewModels.Admin.UserListItemViewModel>
+@{
+    ViewData["Title"] = "Użytkownicy";
+}
+
+<h2>Użytkownicy</h2>
+
+<table class="table table-bordered table-hover mt-3">
+    <thead>
+    <tr>
+        <th>Login</th>
+        <th>Imię i nazwisko</th>
+        <th>Email</th>
+        <th>Telefon</th>
+        <th>Rola</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.Username</td>
+            <td>@user.FullName</td>
+            <td>@user.Email</td>
+            <td>@user.PhoneNumber</td>
+            <td>@user.Role</td>
+        </tr>
+    }
+    </tbody>
+</table>
