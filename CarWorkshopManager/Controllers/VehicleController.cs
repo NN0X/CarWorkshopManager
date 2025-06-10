@@ -1,7 +1,10 @@
-﻿using CarWorkshopManager.Services.Interfaces;
+﻿using CarWorkshopManager.Constants;
+using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.Vehicle;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize(Roles = Roles.Receptionist)]
 public class VehicleController : Controller
 {
     private readonly IVehicleService _vehicleService;
@@ -27,5 +30,36 @@ public class VehicleController : Controller
         TempData["Success"] = "Pojazd dodany.";
 
         return RedirectToAction("Details", "Customer", new { id = vm.CustomerId });
+    }
+
+    public async Task<IActionResult> Index()
+    {
+        return View(await _vehicleService.GetAllVehiclesAsync());
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var vm = await _vehicleService.GetEditVehicleAsync(id);
+        return vm == null ? NotFound() : View(vm);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(VehicleEditViewModel vm)
+    {
+        if (!ModelState.IsValid) return View(vm);
+        await _vehicleService.UpdateVehicleAsync(vm);
+        TempData["Success"] = "Zaktualizowano pojazd.";
+        return RedirectToAction(nameof(Index));
+    }
+    
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UploadPhoto(int id, IFormFile image)
+    {
+        await _vehicleService.UploadVehiclePhotoAsync(id, image);
+        TempData["Success"] = "Zdjęcie zapisane.";
+        return RedirectToAction(nameof(Index));
     }
 }
