@@ -17,9 +17,10 @@ public class VehicleService : IVehicleService
 
     public async Task AddVehicleAsync(AddVehicleViewModel vm)
     {
-        var brand = await _db.VehicleBrands.SingleOrDefaultAsync(b => b.Name == vm.Brand.ToLower());
+        var brandNormalized = vm.Brand.ToLower();
+        var brand = await _db.VehicleBrands.SingleOrDefaultAsync(b => b.Name == brandNormalized);
         if (brand == null)
-            brand = (await _db.VehicleBrands.AddAsync(new VehicleBrand { Name = vm.Brand.ToLower() })).Entity;
+            brand = (await _db.VehicleBrands.AddAsync(new VehicleBrand { Name = brandNormalized })).Entity;
 
         var vehicle = new Vehicle
         {
@@ -31,7 +32,7 @@ public class VehicleService : IVehicleService
             ProductionYear = vm.Year,
             Mileage = vm.Mileage
         };
-        
+
         _db.Vehicles.Add(vehicle);
         await _db.SaveChangesAsync();
     }

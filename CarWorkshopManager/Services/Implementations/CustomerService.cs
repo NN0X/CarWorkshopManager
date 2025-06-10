@@ -32,12 +32,12 @@ public class CustomerService : ICustomerService
         return customers.Select(_mapper.ToCreateCustomerListItemViewModel).ToList();
     }
 
-    public async Task<CustomerListItemViewModel> GetCustomerAsync(int id)
+    public async Task<CustomerListItemViewModel?> GetCustomerAsync(int id)
     {
         var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == id);
         if (customer is null)
             return null;
-        
+
         return _mapper.ToCreateCustomerListItemViewModel(customer);
     }
     public async Task<CustomerDetailsViewModel?> GetCustomerDetailsAsync(int id)

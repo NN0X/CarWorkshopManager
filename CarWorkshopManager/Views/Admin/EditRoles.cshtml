@@ -36,9 +36,9 @@
                 <form asp-action="ChangeRole" method="post" class="d-flex align-items-center">
                     <input type="hidden" name="userId" value="@user.Id" />
                     <select name="newRole" class="form-select form-select-sm me-2">
-                        <option value="Admin" selected="@(user.Role == "Admin")">Admin</option>
-                        <option value="Mechanic" selected="@(user.Role == "Mechanic")">Mechanik</option>
-                        <option value="Receptionist" selected="@(user.Role == "Receptionist")">Recepcjonista</option>
+                        <option value="Admin" @(user.Role == "Admin" ? "selected" : "")>Admin</option>
+                        <option value="Mechanic" @(user.Role == "Mechanic" ? "selected" : "")>Mechanik</option>
+                        <option value="Receptionist" @(user.Role == "Receptionist" ? "selected" : "")>Recepcjonista</option>
                     </select>
                     <button type="submit" class="btn btn-sm btn-primary">Zapisz</button>
                 </form>
