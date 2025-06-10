@@ -1,5 +1,4 @@
-﻿using CarWorkshopManager.Models.Domain;
-using CarWorkshopManager.ViewModels.Customer;
+﻿using CarWorkshopManager.ViewModels.Customer;
 
 namespace CarWorkshopManager.Services.Interfaces;
 
