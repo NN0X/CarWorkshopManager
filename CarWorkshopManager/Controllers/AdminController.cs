@@ -12,11 +12,13 @@ public class AdminController : Controller
 {
     private readonly IUserRegistrationService _registrationService;
     private readonly IEmailSender _emailSender;
+    private readonly IAdminService _adminService;
 
-    public AdminController(IUserRegistrationService registrationService, IEmailSender emailSender)
+    public AdminController(IUserRegistrationService registrationService, IEmailSender emailSender, IAdminService adminService)
     {
         _registrationService = registrationService;
         _emailSender = emailSender;
+        _adminService = adminService;
     }
 
     [HttpGet]
@@ -58,5 +60,35 @@ public class AdminController : Controller
         
         TempData["Success"] = $"Użytkownik {user.UserName} został utworzony, link wysłano na {user.Email}.";
         return RedirectToAction("RegisterUser");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Users()
+    {
+        var users = await _adminService.GetAllUsersAsync();
+        return View(users);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditRoles()
+    {
+        var users = await _adminService.GetAllUsersAsync();
+        return View(users);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangeRole(string userId, string newRole)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(newRole))
+        {
+            TempData["Error"] = "Nieprawidłowe dane.";
+            return RedirectToAction(nameof(Users));
+        }
+
+        var success = await _adminService.ChangeUserRoleAsync(userId, newRole);
+        TempData[success ? "Success" : "Error"] = success ? "Zmieniono rolę użytkownika." : "Nie udało się zmienić roli.";
+
+        return RedirectToAction(nameof(EditRoles));
     }
 }
