@@ -48,7 +48,7 @@ public class CustomerService : ICustomerService
         if (customer == null) 
             return null;
 
-        var vehicles = await _vehicleService.GetCustomerVehicles(id);
+        var vehicles = await _vehicleService.GetCustomerVehiclesAsync(id);
 
         return new CustomerDetailsViewModel
         {

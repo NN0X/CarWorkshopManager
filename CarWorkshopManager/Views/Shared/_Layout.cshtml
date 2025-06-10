@@ -47,5 +47,19 @@
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0">
+            <img id="lightboxImg" src="" class="img-fluid rounded" />
+        </div>
+    </div>
+</div>
+<script>
+    function openLightbox(src) {
+        document.getElementById('lightboxImg').src = src;
+        new bootstrap.Modal('#lightboxModal').show();
+    }
+</script>
+
 </body>
 </html>

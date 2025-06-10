@@ -1,0 +1,88 @@
+﻿@model List<CarWorkshopManager.ViewModels.Vehicle.VehicleListItemViewModel>
+
+@{
+    ViewData["Title"] = "Lista pojazdów";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Foto</th>
+            <th>Marka</th>
+            <th>Model</th>
+            <th>VIN</th>
+            <th>Rejestracja</th>
+            <th>Rok produkcji</th>
+            <th>Przebieg [km]</th>
+            <th>Możliwe akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var v in Model)
+    {
+        <tr>
+            <td>@v.Id</td>
+            <td>
+                @if (!string.IsNullOrEmpty(v.ImageUrl))
+                {
+                    <img src="@v.ImageUrl"
+                         style="max-width:120px;max-height:80px;cursor:pointer;"
+                         onclick="openLightbox('@v.ImageUrl')" />
+                }
+            </td>
+            <td>@v.BrandName</td>
+            <td>@v.Model</td>
+            <td>@v.Vin</td>
+            <td>@v.RegistrationNumber</td>
+            <td>@v.ProductionYear</td>
+            <td>@v.Mileage</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@v.Id"
+                   class="btn btn-sm btn-primary me-1">
+                    Edytuj
+                </a>
+                <form asp-action="UploadPhoto" asp-route-id="@v.Id"
+                      method="post" enctype="multipart/form-data"
+                      class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="file" name="image" accept=".png,.jpg,.jpeg"
+                           id="fileInput-@v.Id" class="d-none"
+                           onchange="this.form.submit()" />
+                    <button type="button"
+                            class="btn btn-sm btn-primary"
+                            onclick="document.getElementById('fileInput-@v.Id').click()">
+                        Dodaj zdjęcie
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-transparent border-0">
+      <img id="lightboxImg" src="" class="img-fluid rounded" />
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+      function openLightbox(src) {
+        document.getElementById('lightboxImg').src = src;
+        new bootstrap.Modal('#lightboxModal').show();
+      }
+    </script>
+}
