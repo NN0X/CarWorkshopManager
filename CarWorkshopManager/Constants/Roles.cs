@@ -8,3 +8,4 @@ public static class Roles
     
     public static readonly string[] AllRoles = { Admin, Receptionist, Mechanic };
 }
+
