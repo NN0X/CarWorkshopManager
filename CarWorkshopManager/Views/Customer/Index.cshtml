@@ -17,7 +17,13 @@
             <td>@customer.FirstName @customer.LastName</td>
             <td>@customer.Email</td>
             <td>@customer.PhoneNumber</td>
+            <td>
+                <a asp-controller="Customer" asp-action="Details" asp-route-id="@customer.Id" class="btn btn-primary btn-sm">
+                    Szczegóły
+                </a>
+            </td>
         </tr>
     }
+    
     </tbody>
 </table>
