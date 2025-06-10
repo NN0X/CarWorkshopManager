@@ -39,4 +39,13 @@ public class CustomerController : Controller
         var customers = await _customerService.GetAllCustomersAsync();
         return View(customers);
     }
+    
+    public async Task<IActionResult> Details(int id)
+    {
+        var vm = await _customerService.GetCustomerDetailsAsync(id);
+        if (vm == null) 
+            return NotFound();
+
+        return View(vm);
+    } 
 }
