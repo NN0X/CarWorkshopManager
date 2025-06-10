@@ -2,12 +2,12 @@
 
 CONTAINER_NAME=sqlserver2022
 
-echo "🛑 Stopping and removing container..."
+echo "Stopping and removing container..."
 docker stop $CONTAINER_NAME
 docker rm $CONTAINER_NAME
 
-echo "🧹 Removing volume..."
+echo "Removing volume..."
 docker volume rm sqlserver2022_data
 
-echo "✅ Cleanup complete."
+echo "Cleanup complete."
 
