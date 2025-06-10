@@ -30,6 +30,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IUsernameGeneratorService, UsernameGeneratorService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 var app = builder.Build();
 
