@@ -4,7 +4,7 @@ using CarWorkshopManager.ViewModels.Vehicle;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize(Roles = Roles.Receptionist)]
+[Authorize(Roles = $"{Roles.Receptionist},{Roles.Admin}")]
 public class VehicleController : Controller
 {
     private readonly IVehicleService _vehicleService;

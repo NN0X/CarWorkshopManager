@@ -14,6 +14,10 @@ public class ServiceOrder
 
     [Required]
     public int VehicleId { get; set; }
+    
+    [Required]
+    [MaxLength(1000)]
+    public string Description { get; set; } = string.Empty;
 
     [Required]
     public int StatusId { get; set; }
