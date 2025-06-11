@@ -27,9 +27,9 @@ public class PartService : IPartService
         return parts.Select(_mapper.ToPartListItemViewModel).ToList();
     }
 
-    public async Task CreatePartAsync(CreatePartViewModel createPartViewModel)
+    public async Task CreatePartAsync(PartFormViewModel partFormViewModel)
     {
-        var part = _mapper.ToPart(createPartViewModel);
+        var part = _mapper.ToPart(partFormViewModel);
         await _db.Parts.AddAsync(part);
         await _db.SaveChangesAsync();
     }
