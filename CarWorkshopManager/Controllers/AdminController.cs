@@ -1,4 +1,5 @@
 ﻿using CarWorkshopManager.Constants;
+using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
@@ -61,21 +62,14 @@ public class AdminController : Controller
         TempData["Success"] = $"Użytkownik {user.UserName} został utworzony, link wysłano na {user.Email}.";
         return RedirectToAction("RegisterUser");
     }
-
+    
     [HttpGet]
     public async Task<IActionResult> Users()
     {
         var users = await _adminService.GetAllUsersAsync();
         return View(users);
     }
-
-    [HttpGet]
-    public async Task<IActionResult> EditRoles()
-    {
-        var users = await _adminService.GetAllUsersAsync();
-        return View(users);
-    }
-
+    
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeRole(string userId, string newRole)
@@ -89,6 +83,49 @@ public class AdminController : Controller
         var success = await _adminService.ChangeUserRoleAsync(userId, newRole);
         TempData[success ? "Success" : "Error"] = success ? "Zmieniono rolę użytkownika." : "Nie udało się zmienić roli.";
 
-        return RedirectToAction(nameof(EditRoles));
+        return RedirectToAction(nameof(Users));
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> Edit(string id)
+    {
+        var user = await _adminService.GetUserByIdAsync(id);
+        if (user == null)
+            return NotFound();
+
+        return View(user);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(ApplicationUser user)
+    {
+        if (!ModelState.IsValid) 
+            return View(user);
+        
+        var result = await _adminService.UpdateUserAsync(user);
+
+        if (result.Succeeded)
+        {
+            TempData["Success"] = "Dane użytkownika zostały zaktualizowane.";
+            return RedirectToAction(nameof(Users));
+        }
+        
+        foreach (var error in result.Errors)
+            ModelState.AddModelError(string.Empty, error.Description);
+        
+        return View(user);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var result = await _adminService.DeleteUserAsync(id);
+        
+        TempData[result.Succeeded ? "Success" : "Error"] =
+            result.Succeeded ? "Użytkownik usunięty." : "Nie można usunąć użytkownika – jest powiązany z innymi danymi.";
+        
+        return RedirectToAction(nameof(Users));
     }
 }
