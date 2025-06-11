@@ -143,6 +143,20 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .OnDelete(DeleteBehavior.Restrict);
         });
         
+        builder.Entity<ServiceTask>()
+            .HasMany(st => st.Mechanics)
+            .WithMany(u  => u.AssignedTasks)
+            .UsingEntity<Dictionary<string, object>>(
+                "ServiceTaskMechanic",          
+                j => j.HasOne<ApplicationUser>()
+                    .WithMany()
+                    .HasForeignKey("MechanicId")
+                    .OnDelete(DeleteBehavior.Restrict),
+                j => j.HasOne<ServiceTask>()
+                    .WithMany()
+                    .HasForeignKey("ServiceTaskId")
+                    .OnDelete(DeleteBehavior.Restrict));
+        
         builder.Entity<UsedPart>(entity =>
         {
             entity.HasOne(up => up.Part)
@@ -159,7 +173,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .OnDelete(DeleteBehavior.Restrict);
         });
         
-
         builder.Entity<WorkRate>(entity =>
         {
             entity.HasOne(wr => wr.VatRate)
