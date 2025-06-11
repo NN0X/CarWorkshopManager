@@ -41,6 +41,7 @@ else
     <table class="table table-bordered">
         <thead>
         <tr>
+            <th>ID</th>
             <th>Marka</th>
             <th>Model</th>
             <th>VIN</th>
@@ -48,12 +49,14 @@ else
             <th>Rok</th>
             <th>Przebieg (km)</th>
             <th>Dodano</th>
+            <th>Akcje</th>
         </tr>
         </thead>
         <tbody>
         @foreach (var v in Model.Vehicles)
         {
             <tr>
+                <td>@v.Id</td>
                 <td>@v.BrandName</td>
                 <td>@v.Model</td>
                 <td>@v.Vin</td>
@@ -61,6 +64,14 @@ else
                 <td>@v.ProductionYear</td>
                 <td>@v.Mileage</td>
                 <td>@v.CreatedAt.ToString("yyyy-MM-dd")</td>
+                <td>
+                    <a asp-controller="ServiceOrder"
+                       asp-action="Create"
+                       asp-route-vehicleId="@v.Id"
+                       class="btn btn-primary btn-sm">
+                        Dodaj zlecenie
+                    </a>
+                </td>
             </tr>
         }
         </tbody>

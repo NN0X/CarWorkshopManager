@@ -1,0 +1,54 @@
+﻿@model IReadOnlyList<CarWorkshopManager.ViewModels.Part.PartListItemViewModel>
+@{
+    ViewData["Title"] = "Katalog części";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Success"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<a asp-action="Create" class="btn btn-primary mb-3">Dodaj nową część</a>
+
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nazwa</th>
+        <th>Cena netto&nbsp;[zł]</th>
+        <th>Stawka&nbsp;VAT</th>
+        <th style="width:150px">Akcje</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.Id</td>
+            <td>@p.Name</td>
+            <td>@p.UnitPriceNet.ToString("0.00")</td>
+            <td>@p.VatRateValue.ToString("P0")</td>  
+            <td>
+                <a  asp-action="Edit"
+                    asp-route-id="@p.Id"
+                    class="btn btn-warning btn-sm me-1">Edytuj</a>
+
+                <form asp-action="Delete"
+                      asp-route-id="@p.Id"
+                      method="post"
+                      class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit"
+                            class="btn btn-danger btn-sm"
+                            onclick="return confirm('Oznaczyć część jako nieaktywną?');">
+                        Usuń
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+    
+    </tbody>
+</table>

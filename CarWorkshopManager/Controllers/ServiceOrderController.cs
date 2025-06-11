@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CarWorkshopManager.Controllers;
 
-[Authorize(Roles = Roles.Receptionist)]
+[Authorize(Roles = $"{Roles.Receptionist},{Roles.Admin}")]
 public class ServiceOrderController : Controller
 {
     private readonly IServiceOrderService _serviceOrderService;

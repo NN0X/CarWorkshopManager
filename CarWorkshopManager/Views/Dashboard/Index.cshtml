@@ -9,8 +9,8 @@
     <p><strong>PANEL ADMINISTRATORA</strong></p>
     <div class="d-grid gap-2 mb-4">
         <a asp-controller="Admin" asp-action="RegisterUser" class="btn btn-primary">Stwórz nowego użytkownika</a>
-        <a asp-controller="Admin" asp-action="EditRoles" class="btn btn-primary">Zmień rolę użytkowników</a>
-        <a asp-controller="Admin" asp-action="Users" class="btn btn-primary">Wyświetl listę użytkowników</a>
+        <a asp-controller="Admin" asp-action="Users" class="btn btn-primary">Wyświetl i zarządzaj użytkownikami</a>
+        <a asp-controller="Part" asp-action="Index" class="btn btn-primary">Katalog części</a>
     </div>
 
     <div class="form-check form-switch mb-2">
@@ -38,8 +38,8 @@
         <p>Twoje zadania będą widoczne tutaj.</p>
         <div class="d-grid gap-2">
             <a asp-controller="Customer" asp-action="Add" class="btn btn-success">Dodaj klienta</a>
-            <a asp-controller="Customer" asp-action="Index" class="btn btn-success">Wyświetl klientów</a>
-            <a asp-controller="Vehicle" asp-action="Index" class="btn btn-success">Lista pojazdów</a>
+            <a asp-controller="Customer" asp-action="Index" class="btn btn-success">Wyświetl i zarządzaj klientami</a>
+            <a asp-controller="Vehicle" asp-action="Index" class="btn btn-success">Wyświetl i zarządzaj pojazdami</a>
             <a asp-controller="ServiceOrder" asp-action="Create" class="btn btn-success">Utwórz zlecenie</a>
         </div>
     </div>
