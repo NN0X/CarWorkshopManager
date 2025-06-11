@@ -45,6 +45,7 @@ public class VehicleService : IVehicleService
             .Where(v => v.CustomerId == customerId)
             .Select(v => new VehicleListItemViewModel
             {
+                Id = v.Id,
                 BrandName = v.VehicleBrand.Name,
                 Model = v.Model,
                 Vin = v.Vin,
