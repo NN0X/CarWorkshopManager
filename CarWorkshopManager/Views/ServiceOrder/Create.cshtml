@@ -12,14 +12,28 @@
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
-    
-    <div class="mb-3">
-        <label asp-for="VehicleId" class="form-label">Wybierz pojazd</label>
-        <select asp-for="VehicleId" class="form-select" asp-items="@(new SelectList(Model.Vehicles, "Id", "RegistrationNumber"))">
-            <option value="">-- wybierz pojazd --</option>
-        </select>
-        <span asp-validation-for="VehicleId" class="text-danger"></span>
-    </div>
+
+    @if (ViewBag.IsVehiclePreselected == true)
+    {
+        var selected = Model.Vehicles.FirstOrDefault(v => v.Id == Model.VehicleId);
+        <div class="mb-3">
+            <label class="form-label">Wybrany pojazd</label>
+            <input class="form-control" value="@($"{selected?.BrandName} {selected?.Model} - {selected?.RegistrationNumber}")" readonly />
+            <input type="hidden" asp-for="VehicleId" />
+        </div>
+    }
+    else
+    {
+        <div class="mb-3">
+            <label asp-for="VehicleId" class="form-label">Wybierz pojazd</label>
+            <select asp-for="VehicleId"
+                    class="form-select"
+                    asp-items="@(new SelectList(Model.Vehicles, "Id", "RegistrationNumber", Model.VehicleId))">
+                <option value="">-- wybierz pojazd --</option>
+            </select>
+            <span asp-validation-for="VehicleId" class="text-danger"></span>
+        </div>
+    }
 
     <div class="mb-3">
         <label asp-for="Description" class="form-label">Opis zlecenia</label>
