@@ -19,10 +19,6 @@ public class Part
     [Required]
     public int VatRateId { get; set; }
 
-    [Required]
-    [Range(0, int.MaxValue)]
-    public int StockQuantity { get; set; }
-
     public bool IsActive { get; set; } = true;
 
 
