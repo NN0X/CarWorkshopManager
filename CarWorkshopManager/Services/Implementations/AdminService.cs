@@ -56,4 +56,35 @@ public class AdminService : IAdminService
         var result = await _userManager.AddToRoleAsync(user, newRole);
         return result.Succeeded;
     }
+
+    public async Task<IdentityResult> DeleteUserAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return IdentityResult.Failed(new IdentityError { Description = "Uzytkownik nie istnieje. " });
+        }
+        
+        return await _userManager.DeleteAsync(user);
+    }
+
+    public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
+    {
+        return await _userManager.FindByIdAsync(userId);
+    }
+
+    public async Task<IdentityResult> UpdateUserAsync(ApplicationUser updatedUser)
+    {
+        var existingUser = await _userManager.FindByIdAsync(updatedUser.Id);
+        if (existingUser == null)
+            return IdentityResult.Failed(new IdentityError { Description = "Użytkownik nie istnieje." });
+        
+        existingUser.FirstName = updatedUser.FirstName;
+        existingUser.LastName = updatedUser.LastName;
+        existingUser.Email = updatedUser.Email;
+        existingUser.NormalizedEmail = _userManager.NormalizeEmail(updatedUser.Email);
+        existingUser.PhoneNumber = updatedUser.PhoneNumber;
+
+        return await _userManager.UpdateAsync(existingUser);
+    }
 }

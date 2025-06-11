@@ -14,6 +14,14 @@ public static class DomainSeeder
                 db.OrderStatuses.Add(new OrderStatus { Name = statusName });
             }
         }
+
+        foreach (var (rate, code) in VatRates.AllVatRates)
+        {
+            if (!db.VatRates.Any(v => v.Rate == rate && v.Code == code))
+            {
+                db.VatRates.Add(new VatRate { Rate = rate, Code = code, ValidFrom = DateOnly.FromDateTime(DateTime.UtcNow) });
+            }
+        }
         
         await db.SaveChangesAsync();
     }
