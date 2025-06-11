@@ -17,7 +17,7 @@
 
     <div class="mb-3">
         <label asp-for="UnitPriceNet" class="form-label"></label>
-        <input asp-for="UnitPriceNet" type="text" class="form-control" />
+        <input asp-for="UnitPriceNet" type="number" step="0.01" class="form-control" />
         <span asp-validation-for="UnitPriceNet" class="text-danger"></span>
     </div>
 
