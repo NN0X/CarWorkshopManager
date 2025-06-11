@@ -7,32 +7,68 @@
 @if (User.IsInRole("Admin"))
 {
     <p><strong>PANEL ADMINISTRATORA</strong></p>
-    <div class="d-grid gap-2">
+    <div class="d-grid gap-2 mb-4">
         <a asp-controller="Admin" asp-action="RegisterUser" class="btn btn-primary">Stwórz nowego użytkownika</a>
         <a asp-controller="Admin" asp-action="EditRoles" class="btn btn-primary">Zmień rolę użytkowników</a>
         <a asp-controller="Admin" asp-action="Users" class="btn btn-primary">Wyświetl listę użytkowników</a>
-        <a asp-controller="Customer" asp-action="Add" class="btn btn-success">Dodaj klienta</a>
-        <a asp-controller="Customer" asp-action="List" class="btn btn-success">Wyświetl klientów</a>
+    </div>
+
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="toggleMechanicPanel">
+        <label class="form-check-label" for="toggleMechanicPanel">Pokaż panel mechanika</label>
+    </div>
+    <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" id="toggleReceptionistPanel">
+        <label class="form-check-label" for="toggleReceptionistPanel">Pokaż panel recepcjonisty</label>
     </div>
 }
 
-else if (User.IsInRole("Mechanic"))
+@if (User.IsInRole("Mechanic") || User.IsInRole("Admin"))
 {
-    <p><strong>PANEL MECHANIKA</strong></p>
-    <p>Twoje zadania będą widoczne tutaj.</p>
-}
-else if (User.IsInRole("Receptionist"))
-{
-    <p><strong>PANEL RECEPCJONISTY</strong></p>
-    <p>Twoje zadania będą widoczne tutaj.</p>
-    <div class="d-grid gap-2">
-        <a asp-controller="Customer" asp-action="Add" class="btn btn-success">Dodaj klienta</a>
-        <a asp-controller="Customer" asp-action="Index" class="btn btn-success">Wyświetl klientów</a>
-        <a asp-controller="Vehicle" asp-action="Index" class="btn btn-success">Lista pojazdów</a>
-
+    <div id="mechanicPanel" class="mb-4" style="display:@(User.IsInRole("Admin") ? "none" : "block")">
+        <p><strong>PANEL MECHANIKA</strong></p>
+        <p>Twoje zadania będą widoczne tutaj.</p>
     </div>
 }
-else
+
+@if (User.IsInRole("Receptionist") || User.IsInRole("Admin"))
+{
+    <div id="receptionistPanel" class="mb-4" style="display:@(User.IsInRole("Admin") ? "none" : "block")">
+        <p><strong>PANEL RECEPCJONISTY</strong></p>
+        <p>Twoje zadania będą widoczne tutaj.</p>
+        <div class="d-grid gap-2">
+            <a asp-controller="Customer" asp-action="Add" class="btn btn-success">Dodaj klienta</a>
+            <a asp-controller="Customer" asp-action="Index" class="btn btn-success">Wyświetl klientów</a>
+            <a asp-controller="Vehicle" asp-action="Index" class="btn btn-success">Lista pojazdów</a>
+            <a asp-controller="ServiceOrder" asp-action="Create" class="btn btn-success">Utwórz zlecenie</a>
+        </div>
+    </div>
+}
+
+@if (!User.IsInRole("Admin") && !User.IsInRole("Mechanic") && !User.IsInRole("Receptionist"))
 {
     <p>Nie przypisano Ci roli lub nie masz dostępu.</p>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const mechToggle = document.getElementById("toggleMechanicPanel");
+            const recToggle = document.getElementById("toggleReceptionistPanel");
+            const mechPanel = document.getElementById("mechanicPanel");
+            const recPanel = document.getElementById("receptionistPanel");
+
+            if (mechToggle) {
+                mechToggle.addEventListener("change", function () {
+                    mechPanel.style.display = this.checked ? "block" : "none";
+                });
+            }
+
+            if (recToggle) {
+                recToggle.addEventListener("change", function () {
+                    recPanel.style.display = this.checked ? "block" : "none";
+                });
+            }
+        });
+    </script>
 }

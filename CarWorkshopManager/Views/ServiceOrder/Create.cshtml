@@ -1,0 +1,36 @@
+﻿@model CarWorkshopManager.ViewModels.ServiceOrder.CreateServiceOrderViewModel
+@{
+    ViewData["Title"] = "Utwórz zlecenie";
+}
+
+<h2 class="mt-4">Utwórz nowe zlecenie</h2>
+
+@if (TempData["SuccessMessage"] is string message)
+{
+    <div class="alert alert-success">@message</div>
+}
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    
+    <div class="mb-3">
+        <label asp-for="VehicleId" class="form-label">Wybierz pojazd</label>
+        <select asp-for="VehicleId" class="form-select" asp-items="@(new SelectList(Model.Vehicles, "Id", "RegistrationNumber"))">
+            <option value="">-- wybierz pojazd --</option>
+        </select>
+        <span asp-validation-for="VehicleId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">Opis zlecenia</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Utwórz zlecenie</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Powrót</a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

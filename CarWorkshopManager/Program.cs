@@ -29,12 +29,13 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddSingleton<CustomerMapper>();
+builder.Services.AddSingleton<ServiceOrderMapper>();
 builder.Services.AddScoped<IUsernameGeneratorService, UsernameGeneratorService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
-
+builder.Services.AddScoped<IServiceOrderService, ServiceOrderService>();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -44,6 +45,7 @@ using (var scope = app.Services.CreateScope())
     var dbContext = services.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
 
+    await DomainSeeder.SeedAsync(dbContext);
     await IdentitySeeder.SeedAsync(services);
 }
 
