@@ -1,30 +1,61 @@
 ﻿@model IEnumerable<CarWorkshopManager.ViewModels.Admin.UserListItemViewModel>
+
 @{
     ViewData["Title"] = "Użytkownicy";
 }
 
-<h2>Użytkownicy</h2>
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
 <table class="table table-bordered table-hover mt-3">
     <thead>
-    <tr>
-        <th>Login</th>
-        <th>Imię i nazwisko</th>
-        <th>Email</th>
-        <th>Telefon</th>
-        <th>Rola</th>
-    </tr>
+        <tr>
+            <th>Login</th>
+            <th>Imię i nazwisko</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>Rola</th>
+            <th>Zmień rolę</th>
+            <th>Akcje</th>
+        </tr>
     </thead>
     <tbody>
-    @foreach (var user in Model)
-    {
-        <tr>
-            <td>@user.Username</td>
-            <td>@user.FullName</td>
-            <td>@user.Email</td>
-            <td>@user.PhoneNumber</td>
-            <td>@user.Role</td>
-        </tr>
-    }
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td>@user.PhoneNumber</td>
+                <td>@user.Role</td>
+                <td>
+                    <form asp-controller="Admin" asp-action="ChangeRole" method="post" class="d-flex gap-1 align-items-center">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <select name="newRole" class="form-select form-select-sm w-auto">
+                            <option value="Admin" selected="@("Admin" == user.Role)">Admin</option>
+                            <option value="Mechanic" selected="@("Mechanic" == user.Role)">Mechanik</option>
+                            <option value="Receptionist" selected="@("Receptionist" == user.Role)">Recepcjonista</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-secondary">Zmień</button>
+                    </form>
+                </td>
+                <td class="d-flex gap-2">
+                    <a asp-controller="Admin" asp-action="Edit" asp-route-id="@user.Id" class="btn btn-warning btn-sm">Edytuj</a>
+                    <form asp-controller="Admin" asp-action="Delete" asp-route-id="@user.Id" method="post" onsubmit="return confirm('Czy na pewno chcesz usunąć tego użytkownika?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+                    </form>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
