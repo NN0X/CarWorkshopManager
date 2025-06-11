@@ -2,8 +2,10 @@
 
 namespace CarWorkshopManager.ViewModels.Part;
 
-public class CreatePartViewModel
+public class PartFormViewModel
 {
+    public int Id { get; set; }
+    
     [Required]
     [MaxLength(100)]
     public string Name { get; set; } = string.Empty;

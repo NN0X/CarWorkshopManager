@@ -6,6 +6,6 @@ namespace CarWorkshopManager.Services.Interfaces;
 public interface IPartService
 {
     Task<List<PartListItemViewModel>> GetAllPartsAsync();
-    Task CreatePartAsync(CreatePartViewModel createPartViewModel);
+    Task CreatePartAsync(PartFormViewModel partFormViewModel);
     Task SoftDeletePartAsync(int id);
 }
