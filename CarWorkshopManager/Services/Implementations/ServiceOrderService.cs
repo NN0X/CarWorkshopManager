@@ -37,6 +37,7 @@ public class ServiceOrderService : IServiceOrderService
         serviceOrder.StatusId = statusId;
         serviceOrder.CustomerNameSnapshot = $"{vehicle.Customer.FirstName} {vehicle.Customer.LastName}";
         serviceOrder.RegistrationNumberSnapshot = vehicle.RegistrationNumber;
+        serviceOrder.OrderNumber = $"ORD-{Guid.NewGuid().ToString("N")[..8].ToUpper()}";
         
         _db.ServiceOrders.Add(serviceOrder);
         await _db.SaveChangesAsync();
