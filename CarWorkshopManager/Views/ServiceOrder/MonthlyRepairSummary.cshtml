@@ -1,0 +1,43 @@
+@model CarWorkshopManager.ViewModels.ServiceOrder.MonthlyRepairSummaryReportViewModel
+
+<h2>Podsumowanie napraw – @Model.Month:yyyy-MM</h2>
+
+<form method="post" class="row g-3 mb-4">
+  <div class="col-auto">
+    <label>Miesiąc:</label>
+    <input type="month" name="Month" value="@Model.Month.ToString("yyyy-MM")" class="form-control"/>
+  </div>
+  <div class="col-auto align-self-end">
+    <button class="btn btn-primary">Pokaż</button>
+  </div>
+  <div class="col-auto align-self-end">
+    <a asp-action="MonthlyRepairSummaryPdf" asp-route-month="@Model.Month.ToString("yyyy-MM")"
+       class="btn btn-outline-secondary">Pobierz PDF</a>
+  </div>
+</form>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Klient</th>
+      <th>Rejestracja</th>
+      <th>Liczba zleceń</th>
+      <th>Netto</th>
+      <th>VAT</th>
+      <th>Brutto</th>
+    </tr>
+  </thead>
+  <tbody>
+  @foreach(var item in Model.Items)
+  {
+    <tr>
+      <td>@item.CustomerName</td>
+      <td>@item.RegistrationNumber</td>
+      <td>@item.OrdersCount</td>
+      <td>@item.TotalCostNet.ToString("0.00")</td>
+      <td>@item.TotalVat.ToString("0.00")</td>
+      <td>@item.TotalCostGross.ToString("0.00")</td>
+    </tr>
+  }
+  </tbody>
+</table>

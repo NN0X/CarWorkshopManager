@@ -185,5 +185,43 @@ namespace CarWorkshopManager.Services.Implementations
                     Items = items
             };
         }
+
+        public async Task<MonthlyRepairSummaryReportViewModel> GetMonthlyRepairSummaryAsync(DateTime month)
+        {
+            var from = new DateTime(month.Year, month.Month, 1);
+            var to   = from.AddMonths(1);
+
+            var data = await _db.ServiceOrders
+                                .Where(o => o.OpenedAt >= from && o.OpenedAt < to &&
+                                        o.Status.Name == OrderStatuses.Completed)
+                                .Select(o => new
+                                                {
+                                                    o.CustomerNameSnapshot,
+                                                    o.RegistrationNumberSnapshot,
+                                                    LaborNet = o.Tasks.Sum(t => t.TotalNet),
+                                                    PartsNet = o.Tasks.SelectMany(t => t.UsedParts).Sum(up => up.TotalNet),
+                                                    LaborVat = o.Tasks.Sum(t => t.TotalVat),
+                                                    PartsVat = o.Tasks.SelectMany(t => t.UsedParts).Sum(up => up.TotalVat)
+                                                })
+                                .ToListAsync();
+
+            var summary = data.GroupBy(x => new { x.CustomerNameSnapshot, x.RegistrationNumberSnapshot })
+                              .Select(g => new MonthlyRepairSummaryItemViewModel
+                                            {
+                                                CustomerName = g.Key.CustomerNameSnapshot,
+                                                RegistrationNumber = g.Key.RegistrationNumberSnapshot,
+                                                OrdersCount = g.Count(),
+                                                TotalCostNet = g.Sum(x => x.LaborNet + x.PartsNet),
+                                                TotalVat = g.Sum(x => x.LaborVat + x.PartsVat)
+                                            })
+                              .OrderBy(x => x.CustomerName)
+                              .ToList();
+
+            return new MonthlyRepairSummaryReportViewModel
+                    {
+                        Month = from,
+                        Items = summary
+                    };
+        }
     }
 }
