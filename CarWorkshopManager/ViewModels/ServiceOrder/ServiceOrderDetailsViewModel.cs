@@ -17,6 +17,8 @@ namespace CarWorkshopManager.ViewModels.ServiceOrder
         public string StatusName { get; set; } = string.Empty;
         public decimal TotalNet { get; set; }
         public decimal TotalVat { get; set; }
+        
+        public string Description { get; set; } = string.Empty;
 
         public List<ServiceTaskListItemViewModel> Tasks { get; set; } = new();
         public ServiceTaskFormViewModel NewTask { get; set; } = new();

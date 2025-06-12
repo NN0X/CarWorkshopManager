@@ -4,26 +4,24 @@
 @functions{
     private static readonly Dictionary<string,string> _pl = new()
     {
-        { OrderStatuses.New,        "Nowe" },
-        { OrderStatuses.InProgress, "W trakcie" },
+        { OrderStatuses.New,        "Nowe"       },
+        { OrderStatuses.InProgress, "W trakcie"  },
         { OrderStatuses.Completed,  "Zakończone" }
     };
     private string Pl(string key) => _pl.TryGetValue(key, out var v) ? v : key;
 }
 
 @{
-    ViewData["Title"] = $"Zlecenie #{Model.OrderNumber}";
+    ViewData["Title"] = $"Zlecenie {Model.OrderNumber}";
 
     var currentUser = User.Identity?.Name;
     bool readOnly = !(User.IsInRole(Roles.Admin) ||
                       Model.Tasks.SelectMany(t => t.Mechanics)
                                  .Any(m => m == currentUser));
 
-   
-    bool canAddComment =
-        User.IsInRole(Roles.Admin)
-     || User.IsInRole(Roles.Receptionist)
-     || User.IsInRole(Roles.Mechanic);
+    bool canAddComment = User.IsInRole(Roles.Admin) ||
+                         User.IsInRole(Roles.Receptionist) ||
+                         User.IsInRole(Roles.Mechanic);
 }
 
 <div class="container-xl">
@@ -39,9 +37,12 @@
         <div class="alert alert-danger">@err</div>
     }
 
+    <!-- ====== Nagłówek ====== -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="row g-3">
+
+                <!-- lewa kolumna -->
                 <div class="col-md-6">
                     <dl class="row mb-0">
                         <dt class="col-5 fw-normal">Klient</dt>
@@ -50,17 +51,36 @@
                         <dt class="col-5 fw-normal">Rejestracja</dt>
                         <dd class="col-7">@Model.RegistrationNumber</dd>
 
+                        <dt class="col-5 fw-normal">Opis zlecenia</dt>
+                        <dd class="col-7">@Model.Description</dd>
+
                         <dt class="col-5 fw-normal">Status</dt>
                         <dd class="col-7">@Pl(Model.StatusName)</dd>
                     </dl>
                 </div>
+
+                <!-- prawa kolumna -->
                 <div class="col-md-6">
                     <dl class="row mb-0">
-                        <dt class="col-6 fw-normal">Łącznie netto</dt>
-                        <dd class="col-6">@Model.TotalNet:0.00 zł</dd>
+                        <dt class="col-6 fw-normal">Robocizna netto</dt>
+                        <dd class="col-6">@($"{ViewBag.LaborNet:0.00} zł")</dd>
 
-                        <dt class="col-6 fw-normal">Łącznie VAT</dt>
-                        <dd class="col-6">@Model.TotalVat:0.00 zł</dd>
+                        <dt class="col-6 fw-normal">Robocizna VAT</dt>
+                        <dd class="col-6">@($"{ViewBag.LaborVat:0.00} zł")</dd>
+
+                        <dt class="col-6 fw-normal">Części netto</dt>
+                        <dd class="col-6">@($"{ViewBag.PartsNet:0.00} zł")</dd>
+
+                        <dt class="col-6 fw-normal">Części VAT</dt>
+                        <dd class="col-6">@($"{ViewBag.PartsVat:0.00} zł")</dd>
+
+                        <hr class="my-2" />
+
+                        <dt class="col-6 fw-bold">Suma netto</dt>
+                        <dd class="col-6 fw-bold">@($"{ViewBag.TotalNet:0.00} zł")</dd>
+
+                        <dt class="col-6 fw-bold">Suma VAT</dt>
+                        <dd class="col-6 fw-bold">@($"{ViewBag.TotalVat:0.00} zł")</dd>
                     </dl>
                 </div>
             </div>
@@ -72,7 +92,7 @@
                     <input type="hidden" name="id" value="@Model.Id" />
                     <div class="col-auto">
                         <select name="newStatus" class="form-select"
-                                asp-items="ViewBag.Statuses"></select>
+                                asp-items="Model.Statuses"></select>
                     </div>
                     <div class="col-auto">
                         <button class="btn btn-warning">Zmień status</button>
@@ -82,79 +102,7 @@
         </div>
     </div>
 
-    <h4>Czynności serwisowe</h4>
-    <div class="accordion mb-4" id="tasksAcc">
-        @for (int i = 0; i < Model.Tasks.Count; i++)
-        {
-            var t = Model.Tasks[i];
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="h@i">
-                    <button class="accordion-button collapsed" type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#c@i" aria-expanded="false"
-                            aria-controls="c@i">
-                        <strong>@t.Description</strong>
-                        <span class="ms-2 small text-muted">
-                            (@t.WorkHours:0.## h × @t.HourRateNetSnapshot:0.00 zł) –
-                            netto <strong>@t.TotalNet:0.00 zł</strong>
-                        </span>
-                    </button>
-                </h2>
-                <div id="c@i" class="accordion-collapse collapse" data-bs-parent="#tasksAcc">
-                    <div class="accordion-body">
-                        <p class="mb-2">
-                            <small class="text-muted">
-                                Mechanicy: @string.Join(", ", t.Mechanics)
-                            </small>
-                        </p>
-
-                        @if (t.Parts.Any())
-                        {
-                            <table class="table table-bordered table-sm mb-4">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Część</th><th style="width:80px;">Ilość</th>
-                                        <th style="width:120px;">Netto</th><th style="width:120px;">VAT</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var p in t.Parts)
-                                    {
-                                        <tr>
-                                            <td>@p.PartName</td>
-                                            <td class="text-end">@p.Quantity</td>
-                                            <td class="text-end">@p.TotalNet:0.00</td>
-                                            <td class="text-end">@p.TotalVat:0.00</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        }
-
-                        @if (!readOnly)
-                        {
-                            <form asp-action="AddPart" method="post" class="row g-2">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="ServiceTaskId" value="@t.Id"/>
-
-                                <div class="col-md">
-                                    <select name="PartId" class="form-select" asp-items="ViewBag.Parts"></select>
-                                </div>
-                                <div class="col-md-2">
-                                    <input name="Quantity" type="number" min="1" value="1"
-                                           class="form-control" />
-                                </div>
-                                <div class="col-md-auto">
-                                    <button class="btn btn-success">Dodaj część</button>
-                                </div>
-                            </form>
-                        }
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-
+    <!-- ====== Dodaj czynność ====== -->
     @if (!readOnly)
     {
         <h4>Dodaj czynność</h4>
@@ -169,18 +117,20 @@
 
             <div class="col-md-2">
                 <label class="form-label">Godziny</label>
-                <input name="WorkHours" type="number" step="0.1" min="0.1" class="form-control"/>
+                <input name="WorkHours" type="number" step="0.01" min="0.01"
+                       class="form-control" />
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Stawka</label>
-                <select name="WorkRateId" class="form-select" asp-items="ViewBag.WorkRates"></select>
+                <select name="WorkRateId" class="form-select"
+                        asp-items="Model.WorkRates"></select>
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Mechanicy</label>
                 <select name="MechanicsIds" class="form-select" multiple
-                        asp-items="ViewBag.Mechanics"></select>
+                        asp-items="Model.Mechanics"></select>
             </div>
 
             <div class="col-12">
@@ -189,19 +139,103 @@
         </form>
     }
 
+    <!-- ====== Czynności serwisowe ====== -->
+    <h4>Czynności serwisowe</h4>
+    <div class="accordion mb-4" id="tasksAcc">
+        @for (int i = 0; i < Model.Tasks.Count; i++)
+        {
+            var t = Model.Tasks[i];
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="h@i">
+                    <button class="accordion-button collapsed" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#c@i"
+                            aria-controls="c@i" aria-expanded="false">
+                        <strong>@t.Description</strong>
+                    </button>
+                </h2>
+
+                <div id="c@i" class="accordion-collapse collapse"
+                     data-bs-parent="#tasksAcc">
+                    <div class="accordion-body">
+
+                        <p class="mb-1">
+                            <strong>Netto czynności:</strong> @t.TotalNet.ToString("0.00") zł
+                        </p>
+
+                        <p class="mb-2">
+                            <small class="text-muted">
+                                Mechanicy: @string.Join(", ", t.Mechanics)
+                            </small>
+                        </p>
+
+                        @* --- CZĘŚCI --- *@
+                        @if (t.Parts.Any())
+                        {
+                            <table class="table table-bordered table-sm mb-4">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Część</th>
+                                        <th style="width:80px;">Ilość</th>
+                                        <th style="width:120px;">Netto</th>
+                                        <th style="width:120px;">VAT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var p in t.Parts)
+                                {
+                                    <tr>
+                                        <td>@p.PartName</td>
+                                        <td class="text-end">@p.Quantity</td>
+                                        <td class="text-end">@p.TotalNet.ToString("0.00")</td>
+                                        <td class="text-end">@p.TotalVat.ToString("0.00")</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        }
+
+                        @if (!readOnly)
+                        {
+                            <form asp-action="AddPart" method="post" class="row g-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ServiceTaskId" value="@t.Id" />
+
+                                <div class="col-md">
+                                    <label class="form-label">Część</label>
+                                    <select name="PartId" class="form-select"
+                                            asp-items="Model.Parts"></select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Ilość</label>
+                                    <input name="Quantity" type="number" min="1" value="1"
+                                           class="form-control" />
+                                </div>
+                                <div class="col-md-auto align-self-end">
+                                    <button class="btn btn-success">Dodaj część</button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- ====== Komentarze ====== -->
     <h4>Komentarze</h4>
 
     @if (Model.Comments.Any())
     {
         <ul class="list-group mb-3">
-            @foreach (var comment in Model.Comments)
+            @foreach (var c in Model.Comments)
             {
                 <li class="list-group-item">
                     <div class="d-flex justify-content-between">
-                        <strong>@comment.AuthorName</strong>
-                        <small class="text-muted">@comment.CreatedAt.ToLocalTime():g</small>
+                        <strong>@c.AuthorName</strong>
+                        <small class="text-muted">@c.CreatedAt.ToLocalTime():g</small>
                     </div>
-                    <p class="mb-0">@comment.Content</p>
+                    <p class="mb-0">@c.Content</p>
                 </li>
             }
         </ul>
@@ -216,17 +250,17 @@
         <form asp-action="AddComment" method="post" class="mb-5">
             @Html.AntiForgeryToken()
             <input type="hidden" name="ServiceOrderId" value="@Model.Id" />
+
             <div class="mb-3">
-                <label for="NewCommentContent" class="form-label">Dodaj komentarz</label>
-                <textarea name="Content" class="form-control" id="NewCommentContent"
-                          maxlength="1000" rows="3" required></textarea>
+                <label class="form-label" for="NewCommentContent">Dodaj komentarz</label>
+                <textarea name="Content" id="NewCommentContent" class="form-control"
+                          rows="3" maxlength="1000" required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Dodaj komentarz</button>
+            <button class="btn btn-primary">Dodaj komentarz</button>
         </form>
     }
-
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial"/>
+    <partial name="_ValidationScriptsPartial" />
 }
