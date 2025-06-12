@@ -129,5 +129,61 @@ namespace CarWorkshopManager.Services.Implementations
                 "Id", "UserName");
             vm.Statuses = new SelectList(OrderStatuses.AllStatuses);
         }
+
+        public async Task<RepairCostReportViewModel> GetRepairCostReportAsync(DateTime? month, int? vehicleId)
+        {
+            var query = _db.ServiceOrders
+                           .Include(o => o.Tasks)
+                           .ThenInclude(t => t.UsedParts)
+                           .AsQueryable();
+
+            if (vehicleId.HasValue)
+                query = query.Where(o => o.VehicleId == vehicleId.Value);
+
+            if (month.HasValue)
+            {
+                var from = new DateTime(month.Value.Year, month.Value.Month, 1);
+                var to = from.AddMonths(1);
+                query = query.Where(o => o.OpenedAt >= from && o.OpenedAt < to);
+            }
+
+            var orders = await query.ToListAsync();
+
+            var items = orders.Select(o =>
+            {
+                var laborNet = o.Tasks.Sum(t => t.TotalNet);
+                var partsNet = o.Tasks
+                                .SelectMany(t => t.UsedParts)
+                                .Sum(up => up.TotalNet);
+                var totalVat = o.Tasks.Sum(t => t.TotalVat)
+                             + o.Tasks.SelectMany(t => t.UsedParts).Sum(up => up.TotalVat);
+
+                return new RepairCostReportItemViewModel
+                {
+                    ServiceOrderId = o.Id,
+                    OrderNumber = o.OrderNumber,
+                    OpenedAt = o.OpenedAt,
+                    CustomerName = o.CustomerNameSnapshot,
+                    RegistrationNumber = o.RegistrationNumberSnapshot,
+                    LaborNet = laborNet,
+                    PartsNet = partsNet,
+                    TotalVat = totalVat
+                };
+            }).ToList();
+
+            var vehicles = await _db.Vehicles
+                                    .Select(v => new SelectListItem {
+                                            Value = v.Id.ToString(),
+                                            Text  = $"{v.RegistrationNumber} ({v.Vin})"
+                                           })
+                                    .ToListAsync();
+
+            return new RepairCostReportViewModel {
+                    Month = month,
+                    VehicleId = vehicleId,
+                    Vehicles = new SelectList(vehicles, "Value", "Text", vehicleId),
+                    Items = items
+            };
+        }
     }
 }

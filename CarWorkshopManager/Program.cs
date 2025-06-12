@@ -1,3 +1,5 @@
+using QuestPDF.Infrastructure;
+using QuestPDF;
 using CarWorkshopManager.Data;
 using CarWorkshopManager.Mappers;
 using CarWorkshopManager.Models.Identity;
@@ -8,6 +10,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 builder.Services.AddControllersWithViews();
 

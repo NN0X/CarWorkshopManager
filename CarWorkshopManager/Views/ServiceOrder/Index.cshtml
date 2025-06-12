@@ -6,6 +6,15 @@
 
 <h2 class="mt-4">@ViewData["Title"]</h2>
 
+<div class="mb-3 d-flex justify-content-end">
+    @if (User.IsInRole("Admin") || User.IsInRole("Receptionist"))
+    {
+        <a asp-action="RepairCostReport" class="btn btn-success">
+            Raport kosztów napraw
+        </a>
+    }
+</div>
+
 <table class="table table-bordered table-hover mt-3">
     <thead>
     <tr>
