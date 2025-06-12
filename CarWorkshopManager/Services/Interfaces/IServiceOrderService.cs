@@ -14,5 +14,6 @@ namespace CarWorkshopManager.Services.Interfaces
         Task<RepairCostReportViewModel> GetRepairCostReportAsync(DateTime? month, int? vehicleId);
         Task<MonthlyRepairSummaryReportViewModel> GetMonthlyRepairSummaryAsync(DateTime month);
         Task<List<ServiceOrderListItemViewModel>> GetOpenServiceOrdersAsync();
+        Task<(decimal laborNet, decimal laborVat, decimal partsNet, decimal partsVat)> GetOrderTotalsAsync(int orderId);
     }
 }
