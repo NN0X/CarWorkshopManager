@@ -1,0 +1,63 @@
+@model CarWorkshopManager.ViewModels.ServiceOrder.RepairCostReportViewModel
+@{
+    ViewData["Title"] = "Raport kosztów napraw";
+}
+<h2>@ViewData["Title"]</h2>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <label>Miesiąc</label>
+        <input type="month" name="month" value="@(Model.Month?.ToString("yyyy-MM"))" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label>Pojazd</label>
+        @Html.DropDownListFor(m => m.VehicleId, Model.Vehicles, "Wszystkie", new { @class = "form-select" })
+    </div>
+    <div class="col-md-3 align-self-end">
+        <button type="submit" class="btn btn-primary">Filtruj</button>
+        <a asp-action="RepairCostReport" class="btn btn-secondary">Wyczyść</a>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nr zlecenia</th>
+            <th>Otwarte</th>
+            <th>Klient</th>
+            <th>Rejestracja</th>
+            <th>Robocizna netto</th>
+            <th>Części netto</th>
+            <th>Razem netto</th>
+            <th>VAT</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>@item.OrderNumber</td>
+            <td>@item.OpenedAt:yyyy-MM-dd</td>
+            <td>@item.CustomerName</td>
+            <td>@item.RegistrationNumber</td>
+            <td>@item.LaborNet.ToString("0.00")</td>
+            <td>@item.PartsNet.ToString("0.00")</td>
+            <td>@item.TotalNet.ToString("0.00")</td>
+            <td>@item.TotalVat.ToString("0.00")</td>
+        </tr>
+    }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4">SUMA</th>
+            <th>@Model.Items.Sum(i => i.LaborNet).ToString("0.00")</th>
+            <th>@Model.Items.Sum(i => i.PartsNet).ToString("0.00")</th>
+            <th>@Model.Items.Sum(i => i.TotalNet).ToString("0.00")</th>
+            <th>@Model.Items.Sum(i => i.TotalVat).ToString("0.00")</th>
+        </tr>
+    </tfoot>
+</table>
+
+<a asp-action="RepairCostReportPdf" asp-route-month="@(Model.Month?.ToString("yyyy-MM"))" asp-route-vehicleId="@(Model.VehicleId)" class="btn btn-outline-secondary">
+    Eksportuj do PDF
+</a>
