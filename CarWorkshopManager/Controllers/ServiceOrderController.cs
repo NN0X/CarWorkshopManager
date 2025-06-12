@@ -174,6 +174,12 @@ namespace CarWorkshopManager.Controllers
             {
                 var vm = await _orderService.GetOrderDetailsAsync(model.ServiceOrderId);
                 await _orderService.PopulateDetailsViewModelAsync(vm, User);
+                
+                // Compute and assign cost totals to ViewBag
+                ViewBag.LaborNet = vm.Tasks.Sum(t => t.LaborCost);
+                ViewBag.PartsNet = vm.Tasks.Sum(t => t.PartsCost);
+                ViewBag.TotalNet = ViewBag.LaborNet + ViewBag.PartsNet;
+                
                 return View("Details", vm);
             }
 
