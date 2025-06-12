@@ -1,5 +1,193 @@
-﻿@model int
+﻿@using CarWorkshopManager.Constants
+@model CarWorkshopManager.ViewModels.ServiceOrder.ServiceOrderDetailsViewModel
 
-<h2>Szczegóły zlecenia #@Model</h2>
+@functions{
+    private static readonly Dictionary<string,string> _pl = new()
+    {
+        { OrderStatuses.New,        "Nowe" },
+        { OrderStatuses.InProgress, "W trakcie" },
+        { OrderStatuses.Completed,  "Zakończone" }
+    };
+    private string Pl(string key) => _pl.TryGetValue(key, out var v) ? v : key;
+}
 
-<p>Tu będą szczegóły zlecenia, komentarze, taski itd.</p>
+@{
+    ViewData["Title"] = $"Zlecenie #{Model.OrderNumber}";
+
+    var currentUser = User.Identity?.Name;
+    bool readOnly = !(User.IsInRole(Roles.Admin) ||
+                      Model.Tasks.SelectMany(t => t.Mechanics)
+                                 .Any(m => m == currentUser));
+}
+
+<div class="container-xl">
+
+    <h2 class="mb-3">Zlecenie @Model.OrderNumber</h2>
+
+    @if (TempData["Success"] is string ok)
+    {
+        <div class="alert alert-success">@ok</div>
+    }
+    @if (TempData["Error"] is string err)
+    {
+        <div class="alert alert-danger">@err</div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <dl class="row mb-0">
+                        <dt class="col-5 fw-normal">Klient</dt>
+                        <dd class="col-7">@Model.CustomerName</dd>
+
+                        <dt class="col-5 fw-normal">Rejestracja</dt>
+                        <dd class="col-7">@Model.RegistrationNumber</dd>
+
+                        <dt class="col-5 fw-normal">Status</dt>
+                        <dd class="col-7">@Pl(Model.StatusName)</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row mb-0">
+                        <dt class="col-6 fw-normal">Łącznie netto</dt>
+                        <dd class="col-6">@Model.TotalNet:0.00 zł</dd>
+
+                        <dt class="col-6 fw-normal">Łącznie VAT</dt>
+                        <dd class="col-6">@Model.TotalVat:0.00 zł</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (!readOnly)
+            {
+                <form asp-action="ChangeStatus" method="post" class="mt-3 row g-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="col-auto">
+                        <select name="newStatus" class="form-select"
+                                asp-items="ViewBag.Statuses"></select>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-warning">Zmień status</button>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+
+    <h4>Czynności serwisowe</h4>
+
+    <div class="accordion mb-4" id="tasksAcc">
+        @for (int i = 0; i < Model.Tasks.Count; i++)
+        {
+            var t = Model.Tasks[i];
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="h@i">
+                    <button class="accordion-button collapsed" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#c@i" aria-expanded="false"
+                            aria-controls="c@i">
+                        <strong>@t.Description</strong>
+                        <span class="ms-2 small text-muted">
+                            (@t.WorkHours:0.## h × @t.HourRateNetSnapshot:0.00 zł) –
+                            netto <strong>@t.TotalNet:0.00 zł</strong>
+                        </span>
+                    </button>
+                </h2>
+                <div id="c@i" class="accordion-collapse collapse" data-bs-parent="#tasksAcc">
+                    <div class="accordion-body">
+
+                        <p class="mb-2">
+                            <small class="text-muted">
+                                Mechanicy: @string.Join(", ", t.Mechanics)
+                            </small>
+                        </p>
+
+                        @* tabela części *@
+                        @if (t.Parts.Any())
+                        {
+                            <table class="table table-bordered table-sm mb-4">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Część</th><th style="width:80px;">Ilość</th>
+                                    <th style="width:120px;">Netto</th><th style="width:120px;">VAT</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var p in t.Parts)
+                                {
+                                    <tr>
+                                        <td>@p.PartName</td>
+                                        <td class="text-end">@p.Quantity</td>
+                                        <td class="text-end">@p.TotalNet:0.00</td>
+                                        <td class="text-end">@p.TotalVat:0.00</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        }
+
+                        @* formularz dodawania części *@
+                        @if (!readOnly)
+                        {
+                            <form asp-action="AddPart" method="post" class="row g-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ServiceTaskId" value="@t.Id"/>
+
+                                <div class="col-md">
+                                    <select name="PartId" class="form-select" asp-items="ViewBag.Parts"></select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input name="Quantity" type="number" min="1" value="1"
+                                           class="form-control" />
+                                </div>
+                                <div class="col-md-auto">
+                                    <button class="btn btn-success">Dodaj część</button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!readOnly)
+    {
+        <h4>Dodaj czynność</h4>
+        <form asp-action="AddTask" method="post" class="row g-3 mb-5">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ServiceOrderId" value="@Model.Id" />
+
+            <div class="col-md-4">
+                <label class="form-label">Opis</label>
+                <input name="Description" class="form-control" maxlength="200" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Godziny</label>
+                <input name="WorkHours" type="number" step="0.1" min="0.1" class="form-control"/>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Stawka</label>
+                <select name="WorkRateId" class="form-select" asp-items="ViewBag.WorkRates"></select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Mechanicy</label>
+                <select name="MechanicsIds" class="form-select" multiple
+                        asp-items="ViewBag.Mechanics"></select>
+            </div>
+
+            <div class="col-12">
+                <button class="btn btn-primary">Dodaj czynność</button>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

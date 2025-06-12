@@ -1,0 +1,43 @@
+﻿@model List<CarWorkshopManager.ViewModels.ServiceOrder.ServiceOrderListItemViewModel>
+
+@{
+    ViewData["Title"] = "Lista zleceń";
+}
+
+<h2 class="mt-4">@ViewData["Title"]</h2>
+
+<table class="table table-bordered table-hover mt-3">
+    <thead>
+    <tr>
+        <th>Nr zlecenia</th>
+        <th>Otwarte</th>
+        <th>Klient</th>
+        <th>Rejestracja</th>
+        <th>Status</th>
+        <th>Suma netto [zł]</th>
+        <th>Suma VAT [zł]</th>
+        <th>Akcje</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var o in Model)
+    {
+        <tr>
+            <td>@o.OrderNumber</td>
+            <td>@o.OpenedAt.ToString("yyyy-MM-dd")</td>
+            <td>@o.CustomerName</td>
+            <td>@o.RegistrationNumber</td>
+            <td>@o.StatusName</td>
+            <td>@o.TotalNet.ToString("0.00")</td>
+            <td>@o.TotalVat.ToString("0.00")</td>
+            <td>
+                <a asp-action="Details"
+                   asp-route-id="@o.Id"
+                   class="btn btn-sm btn-primary">
+                    Zarządzaj
+                </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

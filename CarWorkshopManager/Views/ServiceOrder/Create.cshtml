@@ -3,6 +3,19 @@
     ViewData["Title"] = "Utwórz zlecenie";
 }
 
+@{
+    if (Model.VehicleId == 0)
+    {
+        var vIdRaw = Context.Request.RouteValues["vehicleId"]?.ToString()
+                     ?? Context.Request.Query["vehicleId"].FirstOrDefault();
+
+        if (int.TryParse(vIdRaw, out var vId))
+        {
+            Model.VehicleId = vId;
+        }
+    }
+}
+
 <h2 class="mt-4">Utwórz nowe zlecenie</h2>
 
 @if (TempData["SuccessMessage"] is string message)
@@ -25,7 +38,7 @@
     else
     {
         <div class="mb-3">
-            <label asp-for="VehicleId" class="form-label">Wybierz pojazd</label>
+            <label asp-for="VehicleId" class="form-label">Wybierz pojazd poprzez numer rejestracyjny</label>
             <select asp-for="VehicleId"
                     class="form-select"
                     asp-items="@(new SelectList(Model.Vehicles, "Id", "RegistrationNumber", Model.VehicleId))">
