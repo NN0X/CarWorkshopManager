@@ -4,7 +4,7 @@ using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Implementations;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.ServiceOrder;
-using CarWorkshopManager.ViewModels.ServiceTask;
+using CarWorkshopManager.ViewModels.ServiceTasks;
 using CarWorkshopManager.ViewModels.UsedPart;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
