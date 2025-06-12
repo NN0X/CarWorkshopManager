@@ -18,8 +18,6 @@ public class ServiceTaskService : IServiceTaskService
     private readonly UsedPartMapper _usedPartMapper;
     UserManager<ApplicationUser> _userManager;
 
-    public ICollection<TaskComment> Comments { get; set; } = new List<TaskComment>();
-
     public ServiceTaskService(ApplicationDbContext db, ServiceTaskMapper serviceTaskMapper,
         UsedPartMapper usedPartMapper, UserManager<ApplicationUser> userManager)
     {

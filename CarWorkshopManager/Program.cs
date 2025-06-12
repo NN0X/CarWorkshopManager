@@ -44,7 +44,6 @@ builder.Services.AddScoped<IVatRateService, VatRateService>();
 builder.Services.AddScoped<IPartService, PartService>();
 builder.Services.AddScoped<IWorkRateService, WorkRateService>();
 builder.Services.AddScoped<IServiceTaskService, ServiceTaskService>();
-builder.Services.AddScoped<ITaskCommentService, TaskCommentService>();
 
 var app = builder.Build();
 

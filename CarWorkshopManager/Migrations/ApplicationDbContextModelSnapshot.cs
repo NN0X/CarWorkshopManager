@@ -281,38 +281,6 @@ namespace CarWorkshopManager.Migrations
                     b.ToTable("ServiceTasks");
                 });
 
-            modelBuilder.Entity("CarWorkshopManager.Models.Domain.TaskComment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AuthorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ServiceTaskId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("ServiceTaskId");
-
-                    b.ToTable("TaskComments");
-                });
-
             modelBuilder.Entity("CarWorkshopManager.Models.Domain.UsedPart", b =>
                 {
                     b.Property<int>("Id")
@@ -809,25 +777,6 @@ namespace CarWorkshopManager.Migrations
                     b.Navigation("WorkRate");
                 });
 
-            modelBuilder.Entity("CarWorkshopManager.Models.Domain.TaskComment", b =>
-                {
-                    b.HasOne("CarWorkshopManager.Models.Identity.ApplicationUser", "Author")
-                        .WithMany("TaskComments")
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CarWorkshopManager.Models.Domain.ServiceTask", "ServiceTask")
-                        .WithMany("Comments")
-                        .HasForeignKey("ServiceTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-
-                    b.Navigation("ServiceTask");
-                });
-
             modelBuilder.Entity("CarWorkshopManager.Models.Domain.UsedPart", b =>
                 {
                     b.HasOne("CarWorkshopManager.Models.Domain.Part", "Part")
@@ -962,8 +911,6 @@ namespace CarWorkshopManager.Migrations
 
             modelBuilder.Entity("CarWorkshopManager.Models.Domain.ServiceTask", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("UsedParts");
                 });
 
@@ -977,8 +924,6 @@ namespace CarWorkshopManager.Migrations
                     b.Navigation("CreatedOrders");
 
                     b.Navigation("OrderComments");
-
-                    b.Navigation("TaskComments");
                 });
 #pragma warning restore 612, 618
         }
