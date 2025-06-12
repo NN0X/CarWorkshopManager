@@ -37,6 +37,7 @@ builder.Services.AddSingleton<PartMapper>();
 builder.Services.AddSingleton<UsedPartMapper>();
 builder.Services.AddSingleton<ServiceTaskMapper>();
 builder.Services.AddSingleton<VehicleMapper>();
+builder.Services.AddSingleton<IEmailWithAttachmentSender, SendGridEmailWithAttachmentSender>();
 
 builder.Services.AddScoped<IUsernameGeneratorService, UsernameGeneratorService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
@@ -49,6 +50,8 @@ builder.Services.AddScoped<IVatRateService, VatRateService>();
 builder.Services.AddScoped<IPartService, PartService>();
 builder.Services.AddScoped<IWorkRateService, WorkRateService>();
 builder.Services.AddScoped<IServiceTaskService, ServiceTaskService>();
+
+builder.Services.AddHostedService<OpenOrdersReportBackgroundService>();
 
 var app = builder.Build();
 
