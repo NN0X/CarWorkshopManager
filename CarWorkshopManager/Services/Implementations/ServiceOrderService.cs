@@ -60,12 +60,12 @@ namespace CarWorkshopManager.Services.Implementations
                 .Select(s => s.Id)
                 .FirstAsync();
 
-            var serviceOrder = _mapper.ToServiceOrder(model);
-            serviceOrder.CreatedById = userId;
-            serviceOrder.StatusId = statusId;
-            serviceOrder.CustomerNameSnapshot = $"{vehicle.Customer.FirstName} {vehicle.Customer.LastName}";
-            serviceOrder.RegistrationNumberSnapshot = vehicle.RegistrationNumber;
-            serviceOrder.OrderNumber = "ORD-" + Guid.NewGuid().ToString("N").ToUpper()[..8];
+            var order = _mapper.ToServiceOrder(model);
+            order.CreatedById = userId;
+            order.StatusId = statusId;
+            order.CustomerNameSnapshot = $"{vehicle.Customer.FirstName} {vehicle.Customer.LastName}";
+            order.RegistrationNumberSnapshot = vehicle.RegistrationNumber;
+            order.OrderNumber = "ORD-" + Guid.NewGuid().ToString("N").ToUpper()[..8];
 
             _db.ServiceOrders.Add(order);
             await _db.SaveChangesAsync();
