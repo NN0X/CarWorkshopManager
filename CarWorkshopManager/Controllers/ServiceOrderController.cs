@@ -1,10 +1,12 @@
-﻿using System.Security.Claims;
+﻿using QuestPDF.Fluent;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using CarWorkshopManager.Constants;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.ServiceOrder;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using CarWorkshopManager.Documents;
 
 namespace CarWorkshopManager.Controllers
 {
@@ -79,6 +81,28 @@ namespace CarWorkshopManager.Controllers
             await _commentService.AddCommentAsync(serviceOrderId, userId, content);
             TempData["Success"] = "Komentarz dodany.";
             return RedirectToAction(nameof(Details), new { id = serviceOrderId });
+        }
+
+        [Authorize(Roles = $"{Roles.Receptionist},{Roles.Admin}")]
+        [HttpGet]
+        public async Task<IActionResult> RepairCostReport(DateTime? month, int? vehicleId)
+        {
+            var vm = await _orderService.GetRepairCostReportAsync(month, vehicleId);
+            return View(vm);
+        }
+
+        [Authorize(Roles = $"{Roles.Receptionist},{Roles.Admin}")]
+        [HttpGet]
+        public async Task<IActionResult> RepairCostReportPdf(DateTime? month, int? vehicleId)
+        {
+            RepairCostReportViewModel vm = await _orderService.GetRepairCostReportAsync(month, vehicleId);
+            var document = new RepairCostReportDocument(vm);
+            byte[] pdfBytes = document.GeneratePdf();
+            string fileName = month.HasValue
+                            ? $"Raport_{month:yyyy_MM}.pdf"
+                            : "Raport_All.pdf";
+
+            return File(pdfBytes, "application/pdf", fileName);
         }
     }
 }
