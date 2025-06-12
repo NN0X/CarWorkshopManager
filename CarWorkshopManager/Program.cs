@@ -8,6 +8,7 @@ using CarWorkshopManager.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,10 @@ builder.Services.AddScoped<IServiceTaskService, ServiceTaskService>();
 
 builder.Services.AddHostedService<OpenOrdersReportBackgroundService>();
 
+builder.Logging.ClearProviders();
+builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
+builder.Host.UseNLog();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -83,4 +88,18 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run();
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    var logger = NLog.LogManager.GetCurrentClassLogger();
+    logger.Fatal(ex, "Application terminated unexpectedly");
+    throw;
+}
+finally
+{
+    NLog.LogManager.Shutdown();
+}
+
