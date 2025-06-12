@@ -223,5 +223,17 @@ namespace CarWorkshopManager.Services.Implementations
                         Items = summary
                     };
         }
+
+        public async Task<List<ServiceOrderListItemViewModel>> GetOpenServiceOrdersAsync()
+        {
+            var orders = await _db.ServiceOrders
+                .Include(o => o.Status)
+                .Where(o => o.Status.Name != OrderStatuses.Completed)
+                .ToListAsync();
+
+            return orders
+                .Select(o => _mapper.ToServiceOrderListItemViewModel(o))
+                .ToList();
+        }
     }
 }
