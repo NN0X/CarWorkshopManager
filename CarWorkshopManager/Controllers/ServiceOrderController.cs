@@ -1,15 +1,17 @@
 ﻿using System.Security.Claims;
 using CarWorkshopManager.Constants;
+using CarWorkshopManager.Models.Domain;
 using CarWorkshopManager.Models.Identity;
-using CarWorkshopManager.Services.Implementations;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.ServiceOrder;
 using CarWorkshopManager.ViewModels.ServiceTasks;
 using CarWorkshopManager.ViewModels.UsedPart;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using CarWorkshopManager.Data;
 
 namespace CarWorkshopManager.Controllers;
 
@@ -17,13 +19,29 @@ namespace CarWorkshopManager.Controllers;
 public class ServiceOrderController : Controller
 {
     private readonly IServiceOrderService _serviceOrderService;
-    private readonly IVehicleService      _vehicleService;
+    private readonly IVehicleService _vehicleService;
+    private readonly IServiceTaskService _taskService;
+    private readonly IWorkRateService _workRateService;
+    private readonly IPartService _partService;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ApplicationDbContext _context;
 
-    public ServiceOrderController(IServiceOrderService serviceOrderService,
-                                  IVehicleService vehicleService)
+    public ServiceOrderController(
+        IServiceOrderService serviceOrderService,
+        IVehicleService vehicleService,
+        IServiceTaskService taskService,
+        IWorkRateService workRateService,
+        IPartService partService,
+        UserManager<ApplicationUser> userManager,
+        ApplicationDbContext context)
     {
         _serviceOrderService = serviceOrderService;
-        _vehicleService      = vehicleService;
+        _vehicleService = vehicleService;
+        _taskService = taskService;
+        _workRateService = workRateService;
+        _partService = partService;
+        _userManager = userManager;
+        _context = context;
     }
 
     public async Task<IActionResult> Index()
@@ -59,16 +77,7 @@ public class ServiceOrderController : Controller
         var vm = await _serviceOrderService.GetOrderDetailsAsync(id);
         if (vm is null) return NotFound();
 
-        /* dropdowny */
-        ViewBag.WorkRates = await HttpContext.RequestServices
-            .GetRequiredService<IWorkRateService>().GetSelectWorkRatesAsync();
-        ViewBag.Parts = await HttpContext.RequestServices
-            .GetRequiredService<IPartService>().GetActivePartsSelectAsync();
-        ViewBag.Mechanics = new SelectList(
-            await HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>()
-                .GetUsersInRoleAsync(Roles.Mechanic),
-            "Id", "UserName");
-        ViewBag.Statuses = new SelectList(OrderStatuses.AllStatuses);
+        await PopulateDropdownsAsync();
 
         return View(vm);
     }
@@ -84,9 +93,7 @@ public class ServiceOrderController : Controller
             return RedirectToAction(nameof(Details), new { id = vm.ServiceOrderId });
         }
 
-        var taskService = HttpContext.RequestServices.GetRequiredService<IServiceTaskService>();
-
-        await taskService.AddServiceTaskAsync(vm);
+        await _taskService.AddServiceTaskAsync(vm);
 
         TempData["Success"] = "Dodano czynność.";
         return RedirectToAction(nameof(Details), new { id = vm.ServiceOrderId });
@@ -98,25 +105,60 @@ public class ServiceOrderController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
 
-        var taskService = HttpContext.RequestServices.GetRequiredService<IServiceTaskService>();
         if (!ModelState.IsValid)
         {
-            var orderId = await taskService.GetTaskServiceOrderServiceIdAsync(vm.ServiceTaskId);
+            var orderId = await _taskService.GetTaskServiceOrderServiceIdAsync(vm.ServiceTaskId);
             return await Details(orderId);
         }
 
-        await taskService.AddUsedPartAsync(vm, userId);
-        var oId = await taskService.GetTaskServiceOrderServiceIdAsync(vm.ServiceTaskId);
+        await _taskService.AddUsedPartAsync(vm, userId);
+        var oId = await _taskService.GetTaskServiceOrderServiceIdAsync(vm.ServiceTaskId);
         return RedirectToAction(nameof(Details), new { id = oId });
     }
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeStatus(int id, string newStatus)
     {
-        var ok = await _serviceOrderService.ChangeStatusAsync(
-            id, newStatus, User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Unauthorized();
+
+        var ok = await _serviceOrderService.ChangeStatusAsync(id, newStatus, userId);
 
         TempData[ok ? "Success" : "Error"] = ok ? "Status zaktualizowany." : "Brak uprawnień.";
         return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddComment(int serviceOrderId, string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            TempData["Error"] = "Komentarz nie może być pusty.";
+            return RedirectToAction(nameof(Details), new { id = serviceOrderId });
+        }
+
+        var comment = new OrderComment
+        {
+            ServiceOrderId = serviceOrderId,
+            AuthorId = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+            Content = content,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.OrderComments.Add(comment);
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Komentarz dodany.";
+        return RedirectToAction(nameof(Details), new { id = serviceOrderId });
+    }
+
+    private async Task PopulateDropdownsAsync()
+    {
+        ViewBag.WorkRates = await _workRateService.GetSelectWorkRatesAsync();
+        ViewBag.Parts = await _partService.GetActivePartsSelectAsync();
+        ViewBag.Mechanics = new SelectList(
+            await _userManager.GetUsersInRoleAsync(Roles.Mechanic),
+            "Id", "UserName");
+        ViewBag.Statuses = new SelectList(OrderStatuses.AllStatuses);
     }
 }

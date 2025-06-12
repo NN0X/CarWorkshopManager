@@ -15,9 +15,16 @@
     ViewData["Title"] = $"Zlecenie #{Model.OrderNumber}";
 
     var currentUser = User.Identity?.Name;
+    // Controls task‐editing, status changes, etc.
     bool readOnly = !(User.IsInRole(Roles.Admin) ||
                       Model.Tasks.SelectMany(t => t.Mechanics)
                                  .Any(m => m == currentUser));
+
+    // Allow Admins, Receptionists or Mechanics to add comments
+    bool canAddComment =
+        User.IsInRole(Roles.Admin)
+     || User.IsInRole(Roles.Receptionist)
+     || User.IsInRole(Roles.Mechanic);
 }
 
 <div class="container-xl">
@@ -77,7 +84,6 @@
     </div>
 
     <h4>Czynności serwisowe</h4>
-
     <div class="accordion mb-4" id="tasksAcc">
         @for (int i = 0; i < Model.Tasks.Count; i++)
         {
@@ -97,38 +103,35 @@
                 </h2>
                 <div id="c@i" class="accordion-collapse collapse" data-bs-parent="#tasksAcc">
                     <div class="accordion-body">
-
                         <p class="mb-2">
                             <small class="text-muted">
                                 Mechanicy: @string.Join(", ", t.Mechanics)
                             </small>
                         </p>
 
-                        @* tabela części *@
                         @if (t.Parts.Any())
                         {
                             <table class="table table-bordered table-sm mb-4">
                                 <thead class="table-light">
-                                <tr>
-                                    <th>Część</th><th style="width:80px;">Ilość</th>
-                                    <th style="width:120px;">Netto</th><th style="width:120px;">VAT</th>
-                                </tr>
+                                    <tr>
+                                        <th>Część</th><th style="width:80px;">Ilość</th>
+                                        <th style="width:120px;">Netto</th><th style="width:120px;">VAT</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                @foreach (var p in t.Parts)
-                                {
-                                    <tr>
-                                        <td>@p.PartName</td>
-                                        <td class="text-end">@p.Quantity</td>
-                                        <td class="text-end">@p.TotalNet:0.00</td>
-                                        <td class="text-end">@p.TotalVat:0.00</td>
-                                    </tr>
-                                }
+                                    @foreach (var p in t.Parts)
+                                    {
+                                        <tr>
+                                            <td>@p.PartName</td>
+                                            <td class="text-end">@p.Quantity</td>
+                                            <td class="text-end">@p.TotalNet:0.00</td>
+                                            <td class="text-end">@p.TotalVat:0.00</td>
+                                        </tr>
+                                    }
                                 </tbody>
                             </table>
                         }
 
-                        @* formularz dodawania części *@
                         @if (!readOnly)
                         {
                             <form asp-action="AddPart" method="post" class="row g-2">
@@ -186,6 +189,43 @@
             </div>
         </form>
     }
+
+    <h4>Komentarze</h4>
+
+    @if (Model.Comments.Any())
+    {
+        <ul class="list-group mb-3">
+            @foreach (var comment in Model.Comments)
+            {
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <strong>@comment.AuthorName</strong>
+                        <small class="text-muted">@comment.CreatedAt.ToLocalTime():g</small>
+                    </div>
+                    <p class="mb-0">@comment.Content</p>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="text-muted">Brak komentarzy.</p>
+    }
+
+    @if (canAddComment)
+    {
+        <form asp-action="AddComment" method="post" class="mb-5">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ServiceOrderId" value="@Model.Id" />
+            <div class="mb-3">
+                <label for="NewCommentContent" class="form-label">Dodaj komentarz</label>
+                <textarea name="Content" class="form-control" id="NewCommentContent"
+                          maxlength="1000" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Dodaj komentarz</button>
+        </form>
+    }
+
 </div>
 
 @section Scripts {
