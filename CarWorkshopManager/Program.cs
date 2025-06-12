@@ -21,7 +21,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
         options.User.RequireUniqueEmail = true;
-
         options.Password.RequireDigit = true;
         options.Password.RequireLowercase = true;
         options.Password.RequireNonAlphanumeric = true;
@@ -37,6 +36,7 @@ builder.Services.AddSingleton<ServiceOrderMapper>();
 builder.Services.AddSingleton<PartMapper>();
 builder.Services.AddSingleton<UsedPartMapper>();
 builder.Services.AddSingleton<ServiceTaskMapper>();
+builder.Services.AddSingleton<VehicleMapper>();
 builder.Services.AddSingleton<IEmailWithAttachmentSender, SendGridEmailWithAttachmentSender>();
 
 builder.Services.AddScoped<IUsernameGeneratorService, UsernameGeneratorService>();
