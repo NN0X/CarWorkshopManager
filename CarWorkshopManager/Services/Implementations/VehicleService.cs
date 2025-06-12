@@ -1,4 +1,5 @@
 ﻿using CarWorkshopManager.Data;
+using CarWorkshopManager.Mappers;
 using CarWorkshopManager.Models.Domain;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.Vehicle;
@@ -10,113 +11,71 @@ public class VehicleService : IVehicleService
 {
     private readonly ApplicationDbContext _db;
     private readonly IWebHostEnvironment _env;
+    private readonly VehicleMapper _mapper;
 
-    public VehicleService(ApplicationDbContext db, IWebHostEnvironment env)
+    public VehicleService(ApplicationDbContext db, IWebHostEnvironment env, VehicleMapper mapper)
     {
         _db = db;
+        _mapper = mapper;
         _env = env;
     }
 
-    public async Task AddVehicleAsync(AddVehicleViewModel vm)
-    {
-        var brandNormalized = vm.Brand.ToLower();
-        var brand = await _db.VehicleBrands.SingleOrDefaultAsync(b => b.Name == brandNormalized);
-        if (brand == null)
-            brand = (await _db.VehicleBrands.AddAsync(new VehicleBrand { Name = brandNormalized })).Entity;
-
-        var vehicle = new Vehicle
+     public async Task AddVehicleAsync(AddVehicleViewModel vm)
         {
-            CustomerId = vm.CustomerId,
-            VehicleBrand = brand,
-            Model = vm.Model,
-            Vin = vm.Vin,
-            RegistrationNumber = vm.RegistrationNumber,
-            ProductionYear = vm.Year,
-            Mileage = vm.Mileage
-        };
+            var vehicle = _mapper.ToVehicle(vm);
+            
+            var brandName = vm.Brand.ToLowerInvariant();
+            var existing  = await _db.VehicleBrands
+                                     .SingleOrDefaultAsync(b => b.Name == brandName);
 
-        _db.Vehicles.Add(vehicle);
-        await _db.SaveChangesAsync();
-    }
+            vehicle.VehicleBrand = existing ?? new VehicleBrand { Name = brandName };
 
-    public async Task<List<VehicleListItemViewModel>> GetCustomerVehiclesAsync(int customerId)
-    {
-        return await _db.Vehicles
-            .Where(v => v.CustomerId == customerId)
-            .Select(v => new VehicleListItemViewModel
-            {
-                Id = v.Id,
-                BrandName = v.VehicleBrand.Name,
-                Model = v.Model,
-                Vin = v.Vin,
-                RegistrationNumber = v.RegistrationNumber,
-                ProductionYear = v.ProductionYear,
-                Mileage = v.Mileage,
-                CreatedAt = v.CreatedAt
-            })
-            .ToListAsync();
-    }
+            _db.Vehicles.Add(vehicle);
+            await _db.SaveChangesAsync();
+        }
+     
+        public async Task<List<VehicleListItemViewModel>> GetCustomerVehiclesAsync(int customerId)
+        {
+            return await _mapper
+                   .ProjectToVehicleListItems(_db.Vehicles.Where(v => v.CustomerId == customerId))
+                   .ToListAsync();
+        }
+    
+        public async Task<List<VehicleListItemViewModel>> GetAllVehiclesAsync()
+        {
+            return await _mapper
+                   .ProjectToVehicleListItems(_db.Vehicles)
+                   .ToListAsync();
+        }
+        
+        public async Task<VehicleEditViewModel?> GetEditVehicleAsync(int id)
+        {
+            var vehicle = await _db.Vehicles
+                                   .Include(v => v.VehicleBrand)
+                                   .FirstOrDefaultAsync(v => v.Id == id);
 
-    public async Task<List<VehicleListItemViewModel>> GetAllVehiclesAsync()
-    {
-        return await _db.Vehicles
-            .Select(v => new VehicleListItemViewModel
-            {
-                Id = v.Id,
-                BrandName = v.VehicleBrand.Name,
-                Model = v.Model,
-                Vin = v.Vin,
-                RegistrationNumber = v.RegistrationNumber,
-                ProductionYear = v.ProductionYear,
-                Mileage = v.Mileage,
-                CreatedAt = v.CreatedAt,
-                ImageUrl = v.ImageUrl
-            })
-            .ToListAsync();
-    }
+            return vehicle is null ? null : _mapper.ToEditVm(vehicle);
+        }
 
-    public async Task<VehicleEditViewModel?> GetEditVehicleAsync(int id)
-    {
-        var v = await _db.Vehicles.Include(v => v.VehicleBrand)
-                                  .FirstOrDefaultAsync(v => v.Id == id);
+        public async Task UpdateVehicleAsync(VehicleEditViewModel vm)
+        {
+            var vehicle = await _db.Vehicles
+                                   .Include(v => v.VehicleBrand)
+                                   .FirstOrDefaultAsync(v => v.Id == vm.Id);
+            
+            if (vehicle is null) 
+                return;
+            
+            var brandName = vm.Brand.ToLowerInvariant();
+            var brand = await _db.VehicleBrands.SingleOrDefaultAsync(b => b.Name == brandName)
+                       ?? new VehicleBrand { Name = brandName };
 
-        if (v is null)
-            return null;
+            vehicle.VehicleBrand = brand;
+    
+            _mapper.MapToExisting(vm, vehicle);
 
-        return new VehicleEditViewModel {
-                  Id = v.Id,
-                  Brand = v.VehicleBrand.Name,
-                  Model = v.Model,
-                  Vin = v.Vin,
-                  RegistrationNumber = v.RegistrationNumber,
-                  Year = v.ProductionYear,
-                  Mileage = v.Mileage 
-        };
-    }
-
-    public async Task UpdateVehicleAsync(VehicleEditViewModel vm)
-    {
-        var vehicle = await _db.Vehicles
-            .Include(v => v.VehicleBrand)
-            .FirstOrDefaultAsync(v => v.Id == vm.Id);
-        if (vehicle == null) 
-            return;
-
-        var brandNormalized = vm.Brand.ToLower();
-        var brand = await _db.VehicleBrands.SingleOrDefaultAsync(b => b.Name == brandNormalized);
-        if (brand == null)
-            brand = (await _db.VehicleBrands.AddAsync(new VehicleBrand { Name = brandNormalized })).Entity;
-
-
-        vehicle.VehicleBrand = brand;
-        vehicle.Model = vm.Model;
-        vehicle.Vin = vm.Vin;
-        vehicle.RegistrationNumber = vm.RegistrationNumber;
-        vehicle.ProductionYear = vm.Year;
-        vehicle.Mileage = vm.Mileage;
-
-        await _db.SaveChangesAsync();
-    }
+            await _db.SaveChangesAsync();
+        }
 
     public async Task UploadVehiclePhotoAsync(int id, IFormFile file)
     {
