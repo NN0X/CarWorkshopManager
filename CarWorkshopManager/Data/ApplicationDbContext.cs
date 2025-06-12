@@ -183,6 +183,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<OrderComment>(entity =>
         {
+            entity.HasOne(oc => oc.ServiceOrder)
+                  .WithMany(so => so.Comments)
+                  .HasForeignKey(oc => oc.ServiceOrderId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasOne(oc => oc.Author)
                   .WithMany()
                   .HasForeignKey(oc => oc.AuthorId)

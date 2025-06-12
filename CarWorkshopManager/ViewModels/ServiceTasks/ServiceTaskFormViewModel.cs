@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CarWorkshopManager.ViewModels.ServiceTask;
+namespace CarWorkshopManager.ViewModels.ServiceTasks;
 
 public class ServiceTaskFormViewModel
 {

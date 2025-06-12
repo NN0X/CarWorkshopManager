@@ -1,11 +1,15 @@
-﻿using CarWorkshopManager.ViewModels.ServiceOrder;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using CarWorkshopManager.ViewModels.ServiceOrder;
 
-namespace CarWorkshopManager.Services.Interfaces;
-
-public interface IServiceOrderService
+namespace CarWorkshopManager.Services.Interfaces
 {
-    Task<List<ServiceOrderListItemViewModel>> GetAllServiceOrdersAsync();
-    Task<int> CreateOrderAsync(CreateServiceOrderViewModel createServiceOrderViewModel, string userId);
-    Task<ServiceOrderDetailsViewModel?> GetOrderDetailsAsync(int id);
-    Task<bool> ChangeStatusAsync(int id, string newStatus, string userId);
+    public interface IServiceOrderService
+    {
+        Task<List<ServiceOrderListItemViewModel>> GetAllServiceOrdersAsync();
+        Task<int> CreateOrderAsync(CreateServiceOrderViewModel createVm, string userId);
+        Task<ServiceOrderDetailsViewModel?> GetOrderDetailsAsync(int id);
+        Task<bool> ChangeStatusAsync(int id, string newStatus, string userId);
+        Task PopulateDetailsViewModelAsync(ServiceOrderDetailsViewModel detailsVm, ClaimsPrincipal currentUser);
+    }
 }
