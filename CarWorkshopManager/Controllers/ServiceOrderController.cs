@@ -15,20 +15,30 @@ namespace CarWorkshopManager.Controllers
     {
         private readonly IServiceOrderService _orderService;
         private readonly IOrderCommentService _commentService;
+        private readonly IVehicleService _vehicleService;
 
-        public ServiceOrderController(
-            IServiceOrderService orderService,
-            IOrderCommentService commentService)
+        public ServiceOrderController(IServiceOrderService orderService, IOrderCommentService commentService, IVehicleService vehicleService)
         {
             _orderService = orderService;
             _commentService = commentService;
+            _vehicleService = vehicleService;
         }
 
         public async Task<IActionResult> Index()
             => View(await _orderService.GetAllServiceOrdersAsync());
 
         [HttpGet]
-        public IActionResult Create() => View(new CreateServiceOrderViewModel());
+        public async Task<IActionResult> Create(int? vehicleId = null)
+        {
+            var vm = new CreateServiceOrderViewModel
+            {
+                VehicleId = vehicleId ?? 0,
+                Vehicles = await _vehicleService.GetAllVehiclesAsync()
+            };
+
+            ViewBag.IsVehiclePreselected = vehicleId.HasValue;
+            return View(vm);
+        }
 
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateServiceOrderViewModel model)
@@ -48,7 +58,8 @@ namespace CarWorkshopManager.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var vm = await _orderService.GetOrderDetailsAsync(id);
-            if (vm == null) return NotFound();
+            if (vm == null) 
+                return NotFound();
 
             await _orderService.PopulateDetailsViewModelAsync(vm, User);
             return View(vm);
@@ -58,11 +69,11 @@ namespace CarWorkshopManager.Controllers
         public async Task<IActionResult> ChangeStatus(int id, string newStatus)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized();
+            if (userId == null) 
+                return Unauthorized();
 
             var ok = await _orderService.ChangeStatusAsync(id, newStatus, userId);
-            TempData[ok ? "Success" : "Error"] =
-                ok ? "Status zaktualizowany." : "Brak uprawnień.";
+            TempData[ok ? "Success" : "Error"] = ok ? "Status zaktualizowany." : "Brak uprawnień.";
             return RedirectToAction(nameof(Details), new { id });
         }
 
