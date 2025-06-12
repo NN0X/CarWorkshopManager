@@ -1,4 +1,3 @@
-using System.Globalization;
 using CarWorkshopManager.Data;
 using CarWorkshopManager.Mappers;
 using CarWorkshopManager.Models.Identity;
@@ -6,7 +5,6 @@ using CarWorkshopManager.Services.Implementations;
 using CarWorkshopManager.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +31,8 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddSingleton<CustomerMapper>();
 builder.Services.AddSingleton<ServiceOrderMapper>();
 builder.Services.AddSingleton<PartMapper>();
+builder.Services.AddSingleton<UsedPartMapper>();
+builder.Services.AddSingleton<ServiceTaskMapper>();
 
 builder.Services.AddScoped<IUsernameGeneratorService, UsernameGeneratorService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
@@ -42,6 +42,8 @@ builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IServiceOrderService, ServiceOrderService>();
 builder.Services.AddScoped<IVatRateService, VatRateService>();
 builder.Services.AddScoped<IPartService, PartService>();
+builder.Services.AddScoped<IWorkRateService, WorkRateService>();
+builder.Services.AddScoped<IServiceTaskService, ServiceTaskService>();
 
 var app = builder.Build();
 

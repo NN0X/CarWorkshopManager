@@ -2,6 +2,7 @@
 using CarWorkshopManager.Mappers;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.Part;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarWorkshopManager.Services.Implementations;
@@ -63,4 +64,16 @@ public class PartService : IPartService
         part.IsActive = false;
         await _db.SaveChangesAsync();
     }
+    
+    public async Task<SelectList> GetActivePartsSelectAsync()
+    {
+        var list = await _db.Parts
+            .Where(p => p.IsActive)
+            .OrderBy(p => p.Name)
+            .Select(p => new { p.Id, p.Name })
+            .ToListAsync();
+
+        return new SelectList(list, "Id", "Name");
+    }
+
 }

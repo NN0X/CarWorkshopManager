@@ -23,6 +23,21 @@ public static class DomainSeeder
             }
         }
         
+        var defaultVat23 = db.VatRates.First(v => v.Code == VatRates.Vat23);
+        foreach (var (hourRate, name) in WorkRates.AllWorkRates)
+        {
+            if (!db.WorkRates.Any(w => w.Name == name))
+            {
+                db.WorkRates.Add(new WorkRate
+                {
+                    Name = name,
+                    HourRateNet = hourRate,
+                    VatRateId = defaultVat23.Id,
+                    ValidFrom = DateOnly.FromDateTime(DateTime.UtcNow)
+                });
+            }
+        }
+        
         await db.SaveChangesAsync();
     }
 }
