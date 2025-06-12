@@ -21,7 +21,7 @@ public class EmailSender : IEmailSender
     {
         var client = new SendGridClient(_apiKey);
         var msg = MailHelper.CreateSingleEmail(_sender, new EmailAddress(email), subject, null, htmlMessage);
-        
+
         await client.SendEmailAsync(msg);
     }
 }

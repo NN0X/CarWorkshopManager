@@ -26,11 +26,9 @@ public class ServiceOrderController : Controller
         _vehicleService      = vehicleService;
     }
 
-    /* ───── LISTA ───── */
     public async Task<IActionResult> Index()
         => View(await _serviceOrderService.GetAllServiceOrdersAsync());
 
-    /* ───── UTWORZ ───── */
     [HttpGet]
     public async Task<IActionResult> Create()
         => View(new CreateServiceOrderViewModel
@@ -55,7 +53,6 @@ public class ServiceOrderController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
-    /* ───── SZCZEGÓŁY ───── */
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
@@ -75,8 +72,7 @@ public class ServiceOrderController : Controller
 
         return View(vm);
     }
-    
-    // ServiceOrderController.cs
+
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> AddTask(ServiceTaskFormViewModel vm)
     {
@@ -95,8 +91,7 @@ public class ServiceOrderController : Controller
         TempData["Success"] = "Dodano czynność.";
         return RedirectToAction(nameof(Details), new { id = vm.ServiceOrderId });
     }
-    
-    /* --- dodaj część --- */
+
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> AddPart(UsedPartFormViewModel vm)
     {
@@ -115,7 +110,6 @@ public class ServiceOrderController : Controller
         return RedirectToAction(nameof(Details), new { id = oId });
     }
 
-    /* --- zmiana statusu --- */
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeStatus(int id, string newStatus)
     {

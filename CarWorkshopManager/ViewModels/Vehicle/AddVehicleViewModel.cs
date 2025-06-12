@@ -4,22 +4,22 @@ namespace CarWorkshopManager.ViewModels.Vehicle;
 
 public class AddVehicleViewModel
 {
-    public int CustomerId { get; set; }          
+    public int CustomerId { get; set; }
 
     [Required]
     [MaxLength(50)]
     [Display(Name = "Marka")]
     public string Brand { get; set; } = string.Empty;
 
-    [Required] 
+    [Required]
     [MaxLength(50)]
     public string Model { get; set; } = string.Empty;
 
-    [Required] 
+    [Required]
     [MaxLength(17)]
     public string Vin { get; set; } = string.Empty;
 
-    [Required] 
+    [Required]
     [MaxLength(10)]
     [Display(Name = "Rejestracja")]
     public string RegistrationNumber { get; set; } = string.Empty;

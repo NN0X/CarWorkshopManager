@@ -18,11 +18,11 @@ public class ServiceTask
     [Required]
     public int WorkRateId { get; set; }
 
-    [Required] 
-    [Precision(6, 2)] 
+    [Required]
+    [Precision(6, 2)]
     [Range(0, 1000.00)]
     public decimal WorkHours { get; set; }
-    
+
     [Required]
     [Precision(8, 2)]
     [Range(0.01, 100000.00)]
@@ -32,7 +32,7 @@ public class ServiceTask
     [Precision(4, 2)]
     [Range(0.00, 1.00)]
     public decimal VatRateSnapshot { get; set; } 
-    
+
     [Precision(18, 2)]
     public decimal TotalNet { get; set; }
 
@@ -44,7 +44,6 @@ public class ServiceTask
 
     public DateTime? CompletedAt { get; set; }
 
-    
     public ServiceOrder ServiceOrder { get; set; } = null!;
     public WorkRate WorkRate { get; set; } = null!;
     public ICollection<UsedPart> UsedParts { get; set; } = new List<UsedPart>();
