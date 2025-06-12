@@ -13,13 +13,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Restore dependencies
-        run: dotnet restore CarWorkshopManager
+        run: dotnet restore
 
       - name: Build project
-        run: dotnet build CarWorkshopManager --configuration Release
-
-      - name: Build tests
-        run: dotnet build CarWorkshopManager.Tests
+        run: dotnet build --configuration Release
 
       - name: Run tests
-        run: dotnet test CarWorkshopManager.Tests --configuration Release --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build --verbosity normal
