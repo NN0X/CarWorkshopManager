@@ -127,7 +127,13 @@ namespace CarWorkshopManager.Services.Implementations
             vm.Mechanics = new SelectList(
                 await _userManager.GetUsersInRoleAsync(Roles.Mechanic),
                 "Id", "UserName");
-            vm.Statuses = new SelectList(OrderStatuses.AllStatuses);
+            
+            var statusItems = new[] {
+                    new { Value = OrderStatuses.New,        Text = "Nowe"       },
+                    new { Value = OrderStatuses.InProgress, Text = "W trakcie"  },
+                    new { Value = OrderStatuses.Completed,  Text = "Zakończone" }
+            };
+            vm.Statuses = new SelectList(statusItems, "Value", "Text", vm.StatusName);
         }
 
         public async Task<RepairCostReportViewModel> GetRepairCostReportAsync(DateTime? month, int? vehicleId)
@@ -185,7 +191,7 @@ namespace CarWorkshopManager.Services.Implementations
                     Items = items
             };
         }
-
+        
         public async Task<MonthlyRepairSummaryReportViewModel> GetMonthlyRepairSummaryAsync(DateTime month)
         {
             var from = new DateTime(month.Year, month.Month, 1);
@@ -234,6 +240,25 @@ namespace CarWorkshopManager.Services.Implementations
             return orders
                 .Select(o => _mapper.ToServiceOrderListItemViewModel(o))
                 .ToList();
+        }
+        
+        public async Task<(decimal laborNet, decimal laborVat, decimal partsNet, decimal partsVat)> GetOrderTotalsAsync(int orderId)
+        {
+            var rows = await _db.ServiceTasks
+                .Where(t => t.ServiceOrderId == orderId)
+                .Select(t => new
+                {
+                    LaborNet = t.TotalNet,
+                    LaborVat = t.TotalVat,
+                    PartsNet = t.UsedParts.Sum(up => up.TotalNet),
+                    PartsVat = t.UsedParts.Sum(up => up.TotalVat)
+                })
+                .ToListAsync();
+
+            return (rows.Sum(r => r.LaborNet),
+                rows.Sum(r => r.LaborVat),
+                rows.Sum(r => r.PartsNet),
+                rows.Sum(r => r.PartsVat));
         }
     }
 }
