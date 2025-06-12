@@ -18,5 +18,8 @@ jobs:
       - name: Build project
         run: dotnet build CarWorkshopManager --configuration Release
 
+      - name: Build tests
+        run: dotnet build CarWorkshopManager.Tests
+
       - name: Run tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test CarWorkshopManager.Tests --configuration Release --no-build --verbosity normal
