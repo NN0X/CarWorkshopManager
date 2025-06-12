@@ -15,12 +15,11 @@
     ViewData["Title"] = $"Zlecenie #{Model.OrderNumber}";
 
     var currentUser = User.Identity?.Name;
-    // Controls task‐editing, status changes, etc.
     bool readOnly = !(User.IsInRole(Roles.Admin) ||
                       Model.Tasks.SelectMany(t => t.Mechanics)
                                  .Any(m => m == currentUser));
 
-    // Allow Admins, Receptionists or Mechanics to add comments
+   
     bool canAddComment =
         User.IsInRole(Roles.Admin)
      || User.IsInRole(Roles.Receptionist)
