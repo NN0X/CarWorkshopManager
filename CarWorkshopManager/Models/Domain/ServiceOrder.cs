@@ -31,7 +31,7 @@ public class ServiceOrder
 
     public DateTime? ClosedAt { get; set; }
 
-    [MaxLength(200)] 
+    [MaxLength(200)]
     public string CustomerNameSnapshot { get; set; } = string.Empty;
 
     [MaxLength(10)]

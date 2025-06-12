@@ -1,4 +1,4 @@
-﻿using CarWorkshopManager.ViewModels.ServiceTask;
+﻿using CarWorkshopManager.ViewModels.ServiceTasks;
 using CarWorkshopManager.ViewModels.UsedPart;
 
 namespace CarWorkshopManager.Services.Interfaces;

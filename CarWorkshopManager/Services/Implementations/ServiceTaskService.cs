@@ -3,10 +3,11 @@ using CarWorkshopManager.Data;
 using CarWorkshopManager.Mappers;
 using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Interfaces;
-using CarWorkshopManager.ViewModels.ServiceTask;
+using CarWorkshopManager.ViewModels.ServiceTasks;
 using CarWorkshopManager.ViewModels.UsedPart;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using CarWorkshopManager.Models.Domain;
 
 namespace CarWorkshopManager.Services.Implementations;
 

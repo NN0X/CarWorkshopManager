@@ -1,6 +1,6 @@
 ﻿using CarWorkshopManager.Models.Domain;
 using CarWorkshopManager.Models.Identity;
-using CarWorkshopManager.ViewModels.ServiceTask;
+using CarWorkshopManager.ViewModels.ServiceTasks;
 using Riok.Mapperly.Abstractions;
 
 namespace CarWorkshopManager.Mappers;
