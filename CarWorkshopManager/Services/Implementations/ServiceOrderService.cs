@@ -47,7 +47,7 @@ namespace CarWorkshopManager.Services.Implementations
             serviceOrder.StatusId = statusId;
             serviceOrder.CustomerNameSnapshot = $"{vehicle.Customer.FirstName} {vehicle.Customer.LastName}";
             serviceOrder.RegistrationNumberSnapshot = vehicle.RegistrationNumber;
-            serviceOrder.OrderNumber = $"ORD-{Guid.NewGuid():N}".ToUpper()[..8];
+            serviceOrder.OrderNumber = "ORD-" + Guid.NewGuid().ToString("N").ToUpper()[..8];
 
             _db.ServiceOrders.Add(serviceOrder);
             await _db.SaveChangesAsync();
