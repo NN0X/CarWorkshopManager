@@ -45,7 +45,8 @@ public static class DomainSeeder
         {
             var tuple23 = VatRates.AllVatRates
                                   .FirstOrDefault(t => t.Code == VatRates.Vat23);
-            decimal rate23 = tuple23 != default ? tuple23.Rate : 0.23M;
+            decimal rate23 = tuple23 != default ? tuple23.Rate : 
+                throw new InvalidOperationException("Default VAT rate 23% not found in VatRates.");
             defaultVat23 = new VatRate
             {
                 Code = VatRates.Vat23,
