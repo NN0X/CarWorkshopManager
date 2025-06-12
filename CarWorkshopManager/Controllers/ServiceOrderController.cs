@@ -104,5 +104,40 @@ namespace CarWorkshopManager.Controllers
 
             return File(pdfBytes, "application/pdf", fileName);
         }
+
+        [Authorize(Roles = Roles.Admin)]
+        [HttpGet]
+        public IActionResult MonthlyRepairSummary()
+        {
+            var vm = new MonthlyRepairSummaryReportViewModel
+                    {
+                        Month = DateTime.Today
+                    };
+            return View(vm);
+        }
+
+        [Authorize(Roles = Roles.Admin)]
+        [HttpPost]
+        public async Task<IActionResult> MonthlyRepairSummary(MonthlyRepairSummaryReportViewModel criteria)
+        {
+            if (criteria.Month == default)
+                ModelState.AddModelError(nameof(criteria.Month), "Wybierz miesiąc.");
+
+            if (!ModelState.IsValid)
+                return View(criteria);
+
+            var report = await _orderService.GetMonthlyRepairSummaryAsync(criteria.Month);
+            return View("MonthlyRepairSummary", report);
+        }
+
+        [Authorize(Roles = Roles.Admin)]
+        [HttpGet]
+        public async Task<IActionResult> MonthlyRepairSummaryPdf(DateTime month)
+        {
+            var report = await _orderService.GetMonthlyRepairSummaryAsync(month);
+            var doc = new MonthlyRepairSummaryDocument(report);
+            var pdf = doc.GeneratePdf();
+            return File(pdf, "application/pdf", $"Podsumowanie_{month:yyyy_MM}.pdf");
+        }
     }
 }
