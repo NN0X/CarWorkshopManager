@@ -36,7 +36,7 @@ public class VehicleController : Controller
     {
         return View(await _vehicleService.GetAllVehiclesAsync());
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
@@ -53,7 +53,7 @@ public class VehicleController : Controller
         TempData["Success"] = "Zaktualizowano pojazd.";
         return RedirectToAction(nameof(Index));
     }
-    
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadPhoto(int id, IFormFile image)

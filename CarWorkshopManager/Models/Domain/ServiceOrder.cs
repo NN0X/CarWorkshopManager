@@ -14,7 +14,7 @@ public class ServiceOrder
 
     [Required]
     public int VehicleId { get; set; }
-    
+
     [Required]
     [MaxLength(1000)]
     public string Description { get; set; } = string.Empty;
@@ -42,7 +42,6 @@ public class ServiceOrder
 
     [Precision(18, 2)]
     public decimal TotalVat { get; set; }
-
 
     public Vehicle Vehicle { get; set; } = null!;
     public OrderStatus Status { get; set; } = null!;

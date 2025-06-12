@@ -23,7 +23,7 @@ public class ServiceOrderService : IServiceOrderService
         var orders = await _db.ServiceOrders
             .Include(o => o.Status)
             .ToListAsync();
-        
+
         var vms = orders
             .Select(o => _mapper.ToServiceOrderListItemViewModel(o))
             .ToList();
@@ -51,13 +51,13 @@ public class ServiceOrderService : IServiceOrderService
         serviceOrder.CustomerNameSnapshot = $"{vehicle.Customer.FirstName} {vehicle.Customer.LastName}";
         serviceOrder.RegistrationNumberSnapshot = vehicle.RegistrationNumber;
         serviceOrder.OrderNumber = $"ORD-{Guid.NewGuid().ToString("N")[..8].ToUpper()}";
-        
+
         _db.ServiceOrders.Add(serviceOrder);
         await _db.SaveChangesAsync();
 
         return serviceOrder.Id;
     }
-    
+
     public async Task<ServiceOrderDetailsViewModel?> GetOrderDetailsAsync(int id)
     {
         var order = await _db.ServiceOrders
@@ -65,7 +65,7 @@ public class ServiceOrderService : IServiceOrderService
             .Include(o => o.Tasks)
             .ThenInclude(t => t.Mechanics)
             .Include(o => o.Tasks)
-            .ThenInclude(t => t.UsedParts)      
+            .ThenInclude(t => t.UsedParts)
             .ThenInclude(up => up.Part)
             .FirstOrDefaultAsync(o => o.Id == id);
 
@@ -78,9 +78,9 @@ public class ServiceOrderService : IServiceOrderService
             .Include(o => o.Tasks).ThenInclude(t => t.Mechanics)
             .FirstOrDefaultAsync(o => o.Id == id);
 
-        if (order is null)          
-            return false;
-        
+        if (order is null)
+                return false;
+
         var isAdmin = await _db.Users
             .AnyAsync(u => u.Id == userId && _db.UserRoles.Any(ur => ur.UserId == u.Id && _db.Roles.Any(r => r.Id == ur.RoleId && r.Name == Roles.Admin)));
 
