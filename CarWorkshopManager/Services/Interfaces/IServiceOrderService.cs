@@ -13,5 +13,6 @@ namespace CarWorkshopManager.Services.Interfaces
         Task PopulateDetailsViewModelAsync(ServiceOrderDetailsViewModel detailsVm, ClaimsPrincipal currentUser);
         Task<RepairCostReportViewModel> GetRepairCostReportAsync(DateTime? month, int? vehicleId);
         Task<MonthlyRepairSummaryReportViewModel> GetMonthlyRepairSummaryAsync(DateTime month);
+        Task<List<ServiceOrderListItemViewModel>> GetOpenServiceOrdersAsync();
     }
 }
