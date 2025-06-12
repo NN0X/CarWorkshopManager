@@ -3,10 +3,11 @@ using CarWorkshopManager.Data;
 using CarWorkshopManager.Mappers;
 using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Interfaces;
-using CarWorkshopManager.ViewModels.ServiceTask;
+using CarWorkshopManager.ViewModels.ServiceTasks;
 using CarWorkshopManager.ViewModels.UsedPart;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using CarWorkshopManager.Models.Domain;
 
 namespace CarWorkshopManager.Services.Implementations;
 
@@ -16,6 +17,8 @@ public class ServiceTaskService : IServiceTaskService
     private readonly ServiceTaskMapper _serviceTaskMapper;
     private readonly UsedPartMapper _usedPartMapper;
     UserManager<ApplicationUser> _userManager;
+
+    public ICollection<TaskComment> Comments { get; set; } = new List<TaskComment>();
 
     public ServiceTaskService(ApplicationDbContext db, ServiceTaskMapper serviceTaskMapper,
         UsedPartMapper usedPartMapper, UserManager<ApplicationUser> userManager)

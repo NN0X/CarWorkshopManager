@@ -48,4 +48,5 @@ public class ServiceTask
     public WorkRate WorkRate { get; set; } = null!;
     public ICollection<UsedPart> UsedParts { get; set; } = new List<UsedPart>();
     public ICollection<ApplicationUser> Mechanics { get; set; } = new List<ApplicationUser>();
+    public ICollection<TaskComment> Comments { get; set; } = new List<TaskComment>();
 }

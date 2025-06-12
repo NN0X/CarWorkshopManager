@@ -1,6 +1,6 @@
 ﻿using CarWorkshopManager.ViewModels.UsedPart;
 
-namespace CarWorkshopManager.ViewModels.ServiceTask;
+namespace CarWorkshopManager.ViewModels.ServiceTasks;
 
 public class ServiceTaskListItemViewModel
 {

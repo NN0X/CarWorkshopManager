@@ -1,0 +1,45 @@
+@model CarWorkshopManager.ViewModels.ServiceTasks.ServiceTaskDetailsViewModel
+
+<h3>Komentarze</h3>
+<div id="comments-section">
+    @if (Model.Comments.Any())
+    {
+        foreach (var c in Model.Comments)
+        {
+            <div class="comment">
+                <p><strong>@c.UserName</strong>
+                   <span class="text-muted">(@c.CreatedAt.ToLocalTime():g)</span>
+                </p>
+                <p>@c.Content</p>
+            </div>
+            <hr />
+        }
+    }
+    else
+    {
+        <p>Brak komentarzy.</p>
+    }
+</div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <h4>Dodaj komentarz</h4>
+    <form asp-action="AddComment" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="NewComment.ServiceTaskId" />
+        <div class="form-group">
+            <label asp-for="NewComment.Content"></label>
+            <textarea asp-for="NewComment.Content" class="form-control"></textarea>
+            <span asp-validation-for="NewComment.Content" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Dodaj</button>
+    </form>
+}
+else
+{
+    <p>Aby dodać komentarz, <a asp-controller="Account" asp-action="Login">zaloguj się</a>.</p>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

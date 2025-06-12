@@ -11,6 +11,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Customer> Customers { get; set; }
     public DbSet<OrderComment> OrderComments { get; set; }
+    public DbSet<TaskComment> TaskComments { get; set; }
     public DbSet<OrderStatus> OrderStatuses { get; set; }
     public DbSet<Part> Parts { get; set; }
     public DbSet<ServiceOrder> ServiceOrders { get; set; }
@@ -186,6 +187,19 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasOne(oc => oc.Author)
                   .WithMany()
                   .HasForeignKey(oc => oc.AuthorId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<TaskComment>(entity =>
+        {
+            entity.HasOne(tc => tc.ServiceTask)
+                  .WithMany(st => st.Comments)
+                  .HasForeignKey(tc => tc.ServiceTaskId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(tc => tc.Author)
+                  .WithMany(u => u.TaskComments)
+                  .HasForeignKey(tc => tc.AuthorId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
     }
