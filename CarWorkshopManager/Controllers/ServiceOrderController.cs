@@ -1,12 +1,13 @@
 ﻿using QuestPDF.Fluent;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using CarWorkshopManager.Constants;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.ServiceOrder;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CarWorkshopManager.Documents;
+using CarWorkshopManager.ViewModels.ServiceTasks;
+using CarWorkshopManager.ViewModels.UsedPart;
 
 namespace CarWorkshopManager.Controllers
 {
@@ -16,12 +17,15 @@ namespace CarWorkshopManager.Controllers
         private readonly IServiceOrderService _orderService;
         private readonly IOrderCommentService _commentService;
         private readonly IVehicleService _vehicleService;
+        private readonly IServiceTaskService _serviceTaskService;
 
-        public ServiceOrderController(IServiceOrderService orderService, IOrderCommentService commentService, IVehicleService vehicleService)
+        public ServiceOrderController(IServiceOrderService orderService, IOrderCommentService commentService,
+            IVehicleService vehicleService, IServiceTaskService serviceTaskService)
         {
             _orderService = orderService;
             _commentService = commentService;
             _vehicleService = vehicleService;
+            _serviceTaskService = serviceTaskService;
         }
 
         public async Task<IActionResult> Index()
@@ -62,6 +66,17 @@ namespace CarWorkshopManager.Controllers
                 return NotFound();
 
             await _orderService.PopulateDetailsViewModelAsync(vm, User);
+
+       
+            var (laborNet, laborVat, partsNet, partsVat) = await _orderService.GetOrderTotalsAsync(id);
+
+            ViewBag.LaborNet =  laborNet;
+            ViewBag.LaborVat =  laborVat;
+            ViewBag.PartsNet =  partsNet;
+            ViewBag.PartsVat =  partsVat;
+            ViewBag.TotalNet = laborNet + partsNet;
+            ViewBag.TotalVat = laborVat + partsVat;
+
             return View(vm);
         }
 
@@ -69,7 +84,7 @@ namespace CarWorkshopManager.Controllers
         public async Task<IActionResult> ChangeStatus(int id, string newStatus)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) 
+            if (userId == null)
                 return Unauthorized();
 
             var ok = await _orderService.ChangeStatusAsync(id, newStatus, userId);
@@ -87,7 +102,8 @@ namespace CarWorkshopManager.Controllers
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized();
+            if (userId == null) 
+                return Unauthorized();
 
             await _commentService.AddCommentAsync(serviceOrderId, userId, content);
             TempData["Success"] = "Komentarz dodany.";
@@ -110,8 +126,8 @@ namespace CarWorkshopManager.Controllers
             var document = new RepairCostReportDocument(vm);
             byte[] pdfBytes = document.GeneratePdf();
             string fileName = month.HasValue
-                            ? $"Raport_{month:yyyy_MM}.pdf"
-                            : "Raport_All.pdf";
+                ? $"Raport_{month:yyyy_MM}.pdf"
+                : "Raport_All.pdf";
 
             return File(pdfBytes, "application/pdf", fileName);
         }
@@ -121,9 +137,9 @@ namespace CarWorkshopManager.Controllers
         public IActionResult MonthlyRepairSummary()
         {
             var vm = new MonthlyRepairSummaryReportViewModel
-                    {
-                        Month = DateTime.Today
-                    };
+            {
+                Month = DateTime.Today
+            };
             return View(vm);
         }
 
@@ -149,6 +165,40 @@ namespace CarWorkshopManager.Controllers
             var doc = new MonthlyRepairSummaryDocument(report);
             var pdf = doc.GeneratePdf();
             return File(pdf, "application/pdf", $"Podsumowanie_{month:yyyy_MM}.pdf");
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddTask(ServiceTaskFormViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var vm = await _orderService.GetOrderDetailsAsync(model.ServiceOrderId);
+                await _orderService.PopulateDetailsViewModelAsync(vm, User);
+                return View("Details", vm);
+            }
+
+            await _serviceTaskService.AddServiceTaskAsync(model);
+            TempData["Success"] = "Czynność dodana.";
+            return RedirectToAction(nameof(Details), new { id = model.ServiceOrderId });
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPart(UsedPartFormViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var soId = await _serviceTaskService.GetTaskServiceOrderServiceIdAsync(model.ServiceTaskId);
+                var vm = await _orderService.GetOrderDetailsAsync(soId);
+                await _orderService.PopulateDetailsViewModelAsync(vm, User);
+                return View("Details", vm);
+            }
+
+            var uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            await _serviceTaskService.AddUsedPartAsync(model, uid!);
+
+            TempData["Success"] = "Część dodana.";
+            var orderId = await _serviceTaskService.GetTaskServiceOrderServiceIdAsync(model.ServiceTaskId);
+            return RedirectToAction(nameof(Details), new { id = orderId });
         }
     }
 }
