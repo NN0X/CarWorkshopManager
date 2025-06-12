@@ -30,17 +30,17 @@ public class UserRegistrationService : IUserRegistrationService
             PhoneNumber = phoneNumber,
             EmailConfirmed = true
         };
-        
+
         var createResult = await _userManager.CreateAsync(user);
         if (!createResult.Succeeded)
             return (createResult, null!, null!);
-        
+
         var roleResult = await _userManager.AddToRoleAsync(user, role);
         if (!roleResult.Succeeded)
             return (roleResult, user, null!);
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        
+
         return (IdentityResult.Success, user, token);
     }
 }

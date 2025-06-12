@@ -30,33 +30,33 @@ public class ServiceTaskService : IServiceTaskService
     {
         if (!await _db.ServiceOrders.AnyAsync(o => o.Id == model.ServiceOrderId))
             throw new KeyNotFoundException("Zlecenie nie istnieje");
-        
+
         var wr = await _db.WorkRates
                      .Include(w => w.VatRate)
                      .FirstOrDefaultAsync(w => w.Id == model.WorkRateId)
                  ?? throw new KeyNotFoundException("Stawka robocizny nie istnieje");
-        
+
         var task = _serviceTaskMapper.ToServiceTask(model);
         task.HourRateNetSnapshot = wr.HourRateNet;
         task.VatRateSnapshot = wr.VatRate.Rate;
-        
+
         if (model.MechanicsIds.Any())
         {
             var mechanics = await _db.Users
                 .Where(u => model.MechanicsIds.Contains(u.Id))
                 .ToListAsync();
-            
+
             foreach (var m in mechanics)
                 task.Mechanics.Add(m);
         }
-        
+
         var mechCount = task.Mechanics.Count > 0 ? task.Mechanics.Count : 1;
         task.TotalNet = task.WorkHours * task.HourRateNetSnapshot * mechCount;
         task.TotalVat = task.TotalNet * task.VatRateSnapshot;
-        
+
         _db.ServiceTasks.Add(task);
         await _db.SaveChangesAsync();
-        
+
         await RecalculateTotalsAsync(task.ServiceOrderId);
 
         return task.Id;
@@ -68,7 +68,7 @@ public class ServiceTaskService : IServiceTaskService
                        .Include(t => t.Mechanics)
                        .FirstOrDefaultAsync(t => t.Id == model.ServiceTaskId)
                    ?? throw new KeyNotFoundException("Czynność serwisowa nie istnieje.");
-        
+
         var user = await _userManager.FindByIdAsync(currentUserId)
                    ?? throw new KeyNotFoundException("Niepoprawny użytkownik.");
 
@@ -82,25 +82,25 @@ public class ServiceTaskService : IServiceTaskService
                        .Include(p => p.VatRate)
                        .FirstOrDefaultAsync(p => p.Id == model.PartId && p.IsActive)
                    ?? throw new KeyNotFoundException("Część nie istnieje lub jest nieaktywna");
-        
+
         var used = _usedPartMapper.ToUsedPart(model);
         used.UnitPriceNetSnapshot = part.UnitPriceNet;
         used.VatRateSnapshot = part.VatRate.Rate;
         used.TotalNet = used.Quantity * used.UnitPriceNetSnapshot;
         used.TotalVat = used.TotalNet * used.VatRateSnapshot;
-        
+
         _db.UsedParts.Add(used);
         await _db.SaveChangesAsync();
-        
+
         await RecalculateTotalsAsync(task.ServiceOrderId);
-        
+
         return used.Id;
     }
 
     public async Task<int> GetTaskServiceOrderServiceIdAsync(int serviceTaskId)
     {
         var task = await _db.ServiceTasks.FindAsync(serviceTaskId)
-                   ?? throw new KeyNotFoundException("Czynnośc serwisowa nie istnieje.");
+                   ?? throw new KeyNotFoundException("Czynność serwisowa nie istnieje.");
         return task.ServiceOrderId;
     }
 
@@ -112,10 +112,10 @@ public class ServiceTaskService : IServiceTaskService
                         .ThenInclude(t => t.UsedParts)
                         .FirstOrDefaultAsync(o => o.Id == serviceOrderId)
                     ?? throw new KeyNotFoundException("Zlecenie nie istnieje");
-        
+
         var laborNet = order.Tasks.Sum(t => t.TotalNet);
         var laborVat = order.Tasks.Sum(t => t.TotalVat);
-        
+
         var partsNet = order.Tasks
             .SelectMany(t => t.UsedParts)
             .Sum(up => up.TotalNet);

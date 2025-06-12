@@ -29,7 +29,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.HasIndex(u => u.NormalizedEmail).IsUnique().HasDatabaseName("EmailIndex");
         });
-        
+
         builder.Entity<Customer>(entity =>
         {
             entity.HasIndex(c => c.Email).IsUnique();
@@ -102,7 +102,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .OnDelete(DeleteBehavior.Restrict);
 
         });
-        
+
         builder.Entity<ServiceOrder>(entity =>
         {
             entity.HasOne(so => so.Vehicle)
@@ -126,7 +126,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                   .HasForeignKey(so => so.CreatedById)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<ServiceTask>(entity =>
         {
             entity.HasOne(st => st.WorkRate)
@@ -142,12 +142,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(st => st.ServiceOrderId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<ServiceTask>()
             .HasMany(st => st.Mechanics)
             .WithMany(u  => u.AssignedTasks)
             .UsingEntity<Dictionary<string, object>>(
-                "ServiceTaskMechanic",          
+                "ServiceTaskMechanic",
                 j => j.HasOne<ApplicationUser>()
                     .WithMany()
                     .HasForeignKey("MechanicId")
@@ -156,7 +156,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                     .WithMany()
                     .HasForeignKey("ServiceTaskId")
                     .OnDelete(DeleteBehavior.Restrict));
-        
+
         builder.Entity<UsedPart>(entity =>
         {
             entity.HasOne(up => up.Part)
@@ -172,7 +172,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(up => up.ServiceTaskId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
-        
+
         builder.Entity<WorkRate>(entity =>
         {
             entity.HasOne(wr => wr.VatRate)

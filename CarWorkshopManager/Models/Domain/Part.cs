@@ -21,7 +21,6 @@ public class Part
 
     public bool IsActive { get; set; } = true;
 
-
     public VatRate VatRate { get; set; } = null!;
     public ICollection<UsedPart> UsedParts { get; set; } = new List<UsedPart>();
 }

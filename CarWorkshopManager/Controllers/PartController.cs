@@ -18,13 +18,13 @@ public class PartController : Controller
         _partService = partService;
         _vatRateService = vatRateService;
     }
-    
+
     public async Task<IActionResult> Index()
     {
         var parts = await _partService.GetAllPartsAsync();
         return View(parts);
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Create()
     {
@@ -46,7 +46,7 @@ public class PartController : Controller
         TempData["Success"] = "Część została dodana.";
         return RedirectToAction(nameof(Index));
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
@@ -72,7 +72,7 @@ public class PartController : Controller
         TempData["Success"] = "Część została zaktualizowana.";
         return RedirectToAction(nameof(Index));
     }
-    
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)

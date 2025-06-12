@@ -44,7 +44,7 @@ public class AdminController : Controller
                 ModelState.AddModelError(string.Empty, error.Description);
             return View(model);
         }
-        
+
         var resetLink = Url.Action("ResetPassword", "Account", new { token, email = user.Email }, Request.Scheme);
 
         var subject = "CarworkshopManager - ustaw swoje hasło!";
@@ -56,20 +56,20 @@ public class AdminController : Controller
                 <p><a href=""{resetLink}"">Ustaw hasło</a></p>
                 <br/>
                 <p>Pozdrawiamy,<br/>Zespół CarWorkshopManager</p>";
-        
+
         await _emailSender.SendEmailAsync(user.Email, subject, htmlMessage);
-        
+
         TempData["Success"] = $"Użytkownik {user.UserName} został utworzony, link wysłano na {user.Email}.";
         return RedirectToAction("RegisterUser");
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Users()
     {
         var users = await _adminService.GetAllUsersAsync();
         return View(users);
     }
-    
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeRole(string userId, string newRole)
@@ -85,7 +85,7 @@ public class AdminController : Controller
 
         return RedirectToAction(nameof(Users));
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Edit(string id)
     {
@@ -102,7 +102,7 @@ public class AdminController : Controller
     {
         if (!ModelState.IsValid) 
             return View(user);
-        
+
         var result = await _adminService.UpdateUserAsync(user);
 
         if (result.Succeeded)
@@ -110,10 +110,10 @@ public class AdminController : Controller
             TempData["Success"] = "Dane użytkownika zostały zaktualizowane.";
             return RedirectToAction(nameof(Users));
         }
-        
+
         foreach (var error in result.Errors)
             ModelState.AddModelError(string.Empty, error.Description);
-        
+
         return View(user);
     }
 
@@ -122,10 +122,10 @@ public class AdminController : Controller
     public async Task<IActionResult> Delete(string id)
     {
         var result = await _adminService.DeleteUserAsync(id);
-        
+
         TempData[result.Succeeded ? "Success" : "Error"] =
             result.Succeeded ? "Użytkownik usunięty." : "Nie można usunąć użytkownika – jest powiązany z innymi danymi.";
-        
+
         return RedirectToAction(nameof(Users));
     }
 }

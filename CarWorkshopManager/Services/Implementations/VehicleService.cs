@@ -74,7 +74,7 @@ public class VehicleService : IVehicleService
             })
             .ToListAsync();
     }
-    
+
     public async Task<VehicleEditViewModel?> GetEditVehicleAsync(int id)
     {
         var v = await _db.Vehicles.Include(v => v.VehicleBrand)
@@ -82,7 +82,7 @@ public class VehicleService : IVehicleService
 
         if (v is null)
             return null;
-        
+
         return new VehicleEditViewModel {
                   Id = v.Id,
                   Brand = v.VehicleBrand.Name,
@@ -101,23 +101,23 @@ public class VehicleService : IVehicleService
             .FirstOrDefaultAsync(v => v.Id == vm.Id);
         if (vehicle == null) 
             return;
-        
+
         var brandNormalized = vm.Brand.ToLower();
         var brand = await _db.VehicleBrands.SingleOrDefaultAsync(b => b.Name == brandNormalized);
         if (brand == null)
             brand = (await _db.VehicleBrands.AddAsync(new VehicleBrand { Name = brandNormalized })).Entity;
-        
-        
+
+
         vehicle.VehicleBrand = brand;
         vehicle.Model = vm.Model;
         vehicle.Vin = vm.Vin;
         vehicle.RegistrationNumber = vm.RegistrationNumber;
         vehicle.ProductionYear = vm.Year;
         vehicle.Mileage = vm.Mileage;
-        
+
         await _db.SaveChangesAsync();
     }
-    
+
     public async Task UploadVehiclePhotoAsync(int id, IFormFile file)
     {
         var v = await _db.Vehicles.FindAsync(id);

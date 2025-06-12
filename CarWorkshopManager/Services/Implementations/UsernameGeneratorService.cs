@@ -28,7 +28,7 @@ public class UsernameGeneratorService : IUsernameGeneratorService
             username = $"{baseName}{suffix}";
             suffix++;
         } while (await _userManager.FindByNameAsync(username) is not null);
-        
+
         return username;
     }
 }
