@@ -83,6 +83,7 @@ namespace CarWorkshopManager.Controllers
             return RedirectToAction(nameof(Details), new { id = serviceOrderId });
         }
 
+        [Authorize(Roles = $"{Roles.Receptionist},{Roles.Admin}")]
         [HttpGet]
         public async Task<IActionResult> RepairCostReport(DateTime? month, int? vehicleId)
         {
@@ -90,6 +91,7 @@ namespace CarWorkshopManager.Controllers
             return View(vm);
         }
 
+        [Authorize(Roles = $"{Roles.Receptionist},{Roles.Admin}")]
         [HttpGet]
         public async Task<IActionResult> RepairCostReportPdf(DateTime? month, int? vehicleId)
         {
