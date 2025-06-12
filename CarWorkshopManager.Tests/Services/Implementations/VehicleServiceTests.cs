@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using CarWorkshopManager.Data;
 using CarWorkshopManager.Mappers;
 using CarWorkshopManager.Models.Domain;
@@ -16,7 +12,6 @@ using Xunit;
 using Assert = Xunit.Assert;
 
 namespace CarWorkshopManager.Tests.Services.Implementations
-
 {
     public class VehicleServiceTests : IDisposable
     {
