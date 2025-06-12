@@ -1,12 +1,11 @@
 using Xunit;
 using Moq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using CarWorkshopManager.Services.Implementations;
 using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Interfaces;
-using System.Linq;
 
+namespace CarWorkshopManager.Tests.Services.Implementations;
 public class UserRegistrationServiceTests
 {
     private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;

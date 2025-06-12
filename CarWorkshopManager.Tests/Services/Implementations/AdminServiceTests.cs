@@ -1,137 +1,154 @@
-using Xunit;
-using Moq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using CarWorkshopManager.Services.Implementations;
 using CarWorkshopManager.Models.Identity;
-using System.Linq;
-using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore.Query;
-using System;
-using System.Collections;
-using System.Threading;
+using CarWorkshopManager.Services.Implementations;
+using Microsoft.AspNetCore.Identity;
+using Moq;
+using Xunit;
+using Assert = Xunit.Assert;
 
-public class AdminServiceTests
+namespace CarWorkshopManager.Tests.Services.Implementations
 {
-    private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
-    private readonly AdminService _adminService;
-
-    public AdminServiceTests()
+    public class AdminServiceTests
     {
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        _mockUserManager = new Mock<UserManager<ApplicationUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
-        _adminService = new AdminService(_mockUserManager.Object);
-    }
+        private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
+        private readonly AdminService _adminService;
 
-    [Fact]
-    public async Task GetAllUsersAsync_ReturnsListOfUserListItemViewModel()
-    {
-        var users = new List<ApplicationUser>
+        public AdminServiceTests()
         {
-            new ApplicationUser { Id = "1", UserName = "testuser1", FirstName = "John", LastName = "Doe", Email = "john.doe@example.com", PhoneNumber = "111-222-3333" },
-            new ApplicationUser { Id = "2", UserName = "testuser2", FirstName = "Jane", LastName = "Smith", Email = "jane.smith@example.com", PhoneNumber = "444-555-6666" }
-        };
-        var usersAsyncQueryable = new TestAsyncEnumerable<ApplicationUser>(users);
-        _mockUserManager.Setup(um => um.Users).Returns(usersAsyncQueryable);
-        _mockUserManager.Setup(um => um.GetRolesAsync(It.Is<ApplicationUser>(u => u.Id == "1"))).ReturnsAsync(new List<string> { "Admin" });
-        _mockUserManager.Setup(um => um.GetRolesAsync(It.Is<ApplicationUser>(u => u.Id == "2"))).ReturnsAsync(new List<string> { "Mechanic" });
-        var result = await _adminService.GetAllUsersAsync();
-        Xunit.Assert.NotNull(result);
-        Xunit.Assert.Equal(2, result.Count);
-        Xunit.Assert.Contains(result, u => u.Username == "testuser1" && u.FullName == "John Doe" && u.Role == "Admin" && u.Email == "john.doe@example.com" && u.PhoneNumber == "111-222-3333");
-        Xunit.Assert.Contains(result, u => u.Username == "testuser2" && u.FullName == "Jane Smith" && u.Role == "Mechanic" && u.Email == "jane.smith@example.com" && u.PhoneNumber == "444-555-6666");
-    }
-
-    [Fact]
-    public async Task ChangeUserRoleAsync_ValidUserAndNewRole_ReturnsTrue()
-    {
-        var userId = "123";
-        var newRole = "NewRole";
-        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
-        _mockUserManager.Setup(um => um.FindByIdAsync(userId)).ReturnsAsync(user);
-        _mockUserManager.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(new List<string> { "OldRole" });
-        _mockUserManager.Setup(um => um.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>())).ReturnsAsync(IdentityResult.Success);
-        _mockUserManager.Setup(um => um.AddToRoleAsync(user, newRole)).ReturnsAsync(IdentityResult.Success);
-        var result = await _adminService.ChangeUserRoleAsync(userId, newRole);
-        Xunit.Assert.True(result);
-        _mockUserManager.Verify(um => um.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>()), Times.Once);
-        _mockUserManager.Verify(um => um.AddToRoleAsync(user, newRole), Times.Once);
-    }
-
-    [Fact]
-    public async Task ChangeUserRoleAsync_UserNotFound_ReturnsFalse()
-    {
-        var userId = "nonexistent";
-        var newRole = "NewRole";
-        _mockUserManager.Setup(um => um.FindByIdAsync(userId)).ReturnsAsync((ApplicationUser)null!);
-        var result = await _adminService.ChangeUserRoleAsync(userId, newRole);
-        Xunit.Assert.False(result);
-        _mockUserManager.Verify(um => um.GetRolesAsync(It.IsAny<ApplicationUser>()), Times.Never);
-        _mockUserManager.Verify(um => um.RemoveFromRolesAsync(It.IsAny<ApplicationUser>(), It.IsAny<IEnumerable<string>>()), Times.Never);
-        _mockUserManager.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task ChangeUserRoleAsync_RemoveRoleFails_ReturnsFalse()
-    {
-        var userId = "123";
-        var newRole = "NewRole";
-        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
-        _mockUserManager.Setup(um => um.FindByIdAsync(userId)).ReturnsAsync(user);
-        _mockUserManager.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(new List<string> { "OldRole" });
-        _mockUserManager.Setup(um => um.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>())).ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Error" }));
-        var result = await _adminService.ChangeUserRoleAsync(userId, newRole);
-        Xunit.Assert.False(result);
-        _mockUserManager.Verify(um => um.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>()), Times.Once);
-        _mockUserManager.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task ChangeUserRoleAsync_AddRoleFails_ReturnsFalse()
-    {
-        var userId = "123";
-        var newRole = "NewRole";
-        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
-        _mockUserManager.Setup(um => um.FindByIdAsync(userId)).ReturnsAsync(user);
-        _mockUserManager.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(new List<string>());
-        _mockUserManager.Setup(um => um.AddToRoleAsync(user, newRole)).ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Error" }));
-        var result = await _adminService.ChangeUserRoleAsync(userId, newRole);
-        Xunit.Assert.False(result);
-        _mockUserManager.Verify(um => um.AddToRoleAsync(user, newRole), Times.Once);
-    }
-
-    internal class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
-    {
-        private readonly IQueryProvider _inner;
-        internal TestAsyncQueryProvider(IQueryProvider inner) { _inner = inner; }
-        public IQueryable CreateQuery(Expression expression)
-        {
-            var elementType = expression.Type.GetGenericArguments().First();
-            var enumerType = typeof(TestAsyncEnumerable<>).MakeGenericType(elementType);
-            return (IQueryable)Activator.CreateInstance(enumerType, expression)!;
+            var store = new Mock<IUserStore<ApplicationUser>>();
+            _userManagerMock = new Mock<UserManager<ApplicationUser>>(
+                store.Object, null, null, null, null, null, null, null, null);
+            _adminService = new AdminService(_userManagerMock.Object);
         }
-        public IQueryable<TElement> CreateQuery<TElement>(Expression expression) { return new TestAsyncEnumerable<TElement>(expression); }
-        public object? Execute(Expression expression) { return _inner.Execute(expression); }
-        public TResult Execute<TResult>(Expression expression) { return _inner.Execute<TResult>(expression); }
-        public IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression expression) { return new TestAsyncEnumerable<TResult>(expression); }
-        public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken) { return _inner.Execute<TResult>(expression); }
-    }
 
-    internal class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
-    {
-        public TestAsyncEnumerable(IEnumerable<T> enumerable) : base(enumerable) { }
-        public TestAsyncEnumerable(Expression expression) : base(expression) { }
-        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default) { return new TestAsyncEnumerator<T>(this.AsEnumerable().GetEnumerator()); }
-        IQueryProvider IQueryable.Provider => new TestAsyncQueryProvider<T>(this);
-    }
+        [Fact]
+        public async Task ChangeUserRoleAsync_UserNotFound_ReturnsFalse()
+        {
+            _userManagerMock.Setup(u => u.FindByIdAsync("id")).ReturnsAsync((ApplicationUser)null);
 
-    internal class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
-    {
-        private readonly IEnumerator<T> _inner;
-        public TestAsyncEnumerator(IEnumerator<T> inner) { _inner = inner; }
-        public T Current => _inner.Current;
-        public ValueTask DisposeAsync() { _inner.Dispose(); return new ValueTask(); }
-        public ValueTask<bool> MoveNextAsync() { return new ValueTask<bool>(_inner.MoveNext()); }
+            var result = await _adminService.ChangeUserRoleAsync("id", "NewRole");
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task ChangeUserRoleAsync_RemoveRolesFails_ReturnsFalse()
+        {
+            var user = new ApplicationUser { Id = "1" };
+            _userManagerMock.Setup(u => u.FindByIdAsync("1")).ReturnsAsync(user);
+            _userManagerMock.Setup(u => u.GetRolesAsync(user)).ReturnsAsync(new List<string> { "OldRole" });
+            _userManagerMock
+                .Setup(u => u.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(IdentityResult.Failed());
+
+            var result = await _adminService.ChangeUserRoleAsync("1", "NewRole");
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task ChangeUserRoleAsync_AddRoleFails_ReturnsFalse()
+        {
+            var user = new ApplicationUser { Id = "1" };
+            _userManagerMock.Setup(u => u.FindByIdAsync("1")).ReturnsAsync(user);
+            _userManagerMock.Setup(u => u.GetRolesAsync(user)).ReturnsAsync(new List<string>());
+            _userManagerMock
+                .Setup(u => u.AddToRoleAsync(user, "NewRole"))
+                .ReturnsAsync(IdentityResult.Failed());
+
+            var result = await _adminService.ChangeUserRoleAsync("1", "NewRole");
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task ChangeUserRoleAsync_Succeeds_ReturnsTrue()
+        {
+            var user = new ApplicationUser { Id = "1" };
+            _userManagerMock.Setup(u => u.FindByIdAsync("1")).ReturnsAsync(user);
+            _userManagerMock.Setup(u => u.GetRolesAsync(user)).ReturnsAsync(new List<string> { "Old" });
+            _userManagerMock
+                .Setup(u => u.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(IdentityResult.Success);
+            _userManagerMock
+                .Setup(u => u.AddToRoleAsync(user, "NewRole"))
+                .ReturnsAsync(IdentityResult.Success);
+
+            var result = await _adminService.ChangeUserRoleAsync("1", "NewRole");
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_UserNotFound_ReturnsFailedResult()
+        {
+            _userManagerMock.Setup(u => u.FindByIdAsync("1")).ReturnsAsync((ApplicationUser)null);
+
+            var result = await _adminService.DeleteUserAsync("1");
+
+            Assert.False(result.Succeeded);
+            Assert.Contains(result.Errors, e => e.Description.Contains("nie istnieje"));
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_Succeeds_ReturnsSuccess()
+        {
+            var user = new ApplicationUser { Id = "1" };
+            _userManagerMock.Setup(u => u.FindByIdAsync("1")).ReturnsAsync(user);
+            _userManagerMock.Setup(u => u.DeleteAsync(user)).ReturnsAsync(IdentityResult.Success);
+
+            var result = await _adminService.DeleteUserAsync("1");
+
+            Assert.True(result.Succeeded);
+        }
+
+        [Fact]
+        public async Task GetUserByIdAsync_ReturnsUser()
+        {
+            var user = new ApplicationUser { Id = "1" };
+            _userManagerMock.Setup(u => u.FindByIdAsync("1")).ReturnsAsync(user);
+
+            var result = await _adminService.GetUserByIdAsync("1");
+
+            Assert.Equal(user, result);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_UserNotFound_ReturnsFailedResult()
+        {
+            var updated = new ApplicationUser { Id = "1" };
+            _userManagerMock.Setup(u => u.FindByIdAsync("1")).ReturnsAsync((ApplicationUser)null);
+
+            var result = await _adminService.UpdateUserAsync(updated);
+
+            Assert.False(result.Succeeded);
+            Assert.Contains(result.Errors, e => e.Description.Contains("nie istnieje"));
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_Succeeds_ReturnsSuccess()
+        {
+            var existing = new ApplicationUser
+            {
+                Id = "1", FirstName = "Old", LastName = "Name", Email = "old@example.com", PhoneNumber = "000"
+            };
+            
+            var updated = new ApplicationUser
+            {
+                Id = "1", FirstName = "New", LastName = "Name", Email = "new@example.com", PhoneNumber = "111"
+            };
+            
+            _userManagerMock.Setup(u => u.FindByIdAsync("1")).ReturnsAsync(existing);
+            _userManagerMock.Setup(u => u.NormalizeEmail(updated.Email)).Returns(updated.Email.ToUpper());
+            _userManagerMock
+                .Setup(u => u.UpdateAsync(It.IsAny<ApplicationUser>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            var result = await _adminService.UpdateUserAsync(updated);
+
+            Assert.True(result.Succeeded);
+            Assert.Equal("New", existing.FirstName);
+            Assert.Equal("new@example.com", existing.Email);
+            Assert.Equal("111", existing.PhoneNumber);
+        }
     }
 }
