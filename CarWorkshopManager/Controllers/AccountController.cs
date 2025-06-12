@@ -30,12 +30,12 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
             return View(lvm);
-        
+
         var result = await _signInManager.PasswordSignInAsync(lvm.Username, lvm.Password, lvm.RememberMe, false);
-        
+
         if (result.Succeeded)
             return RedirectToAction("Index", "Home");
-        
+
         ModelState.AddModelError(string.Empty, "Niepoprawna nazwa użytkownika lub hasło.");
         return View(lvm);
     }
@@ -57,10 +57,10 @@ public class AccountController : Controller
             Token = token,
             Email = email
         };
-        
+
         return View(vm);
     }
-    
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ResetPassword(ResetPasswordViewModel vm)
@@ -80,7 +80,7 @@ public class AccountController : Controller
             ModelState.AddModelError(string.Empty, e.Description);
         return View(vm);
     }
-    
+
     [HttpGet]
     public IActionResult ResetPasswordConfirmation()
     {

@@ -13,10 +13,10 @@ public class UsedPart
     [Required]
     public int PartId { get; set; }
 
-    [Required] 
-    [Range(1, int.MaxValue)] 
+    [Required]
+    [Range(1, int.MaxValue)]
     public int Quantity { get; set; } = 1;
-    
+
     [Required]
     [Precision(10, 2)]
     [Range(0.01, 10000000)]
@@ -26,14 +26,13 @@ public class UsedPart
     [Precision(4, 2)]
     [Range(0.00, 1.00)]
     public decimal VatRateSnapshot { get; set; }
-    
+
     [Precision(18, 2)]
     public decimal TotalNet { get; set; }
 
     [Precision(18, 2)]
     public decimal TotalVat { get; set; }
 
-    
     public ServiceTask ServiceTask { get; set; } = null!;
     public Part Part { get; set; } = null!;
 }

@@ -28,7 +28,7 @@ public class CustomerController : Controller
     {
         if (!ModelState.IsValid)
             return View(model);
-        
+
         await _customerService.AddCustomerAsync(model);
         TempData["Success"] = "Klient został dodany.";
         return RedirectToAction("Add");
@@ -39,7 +39,7 @@ public class CustomerController : Controller
         var customers = await _customerService.GetAllCustomersAsync();
         return View(customers);
     }
-    
+
     public async Task<IActionResult> Details(int id)
     {
         var vm = await _customerService.GetCustomerDetailsAsync(id);
@@ -47,5 +47,5 @@ public class CustomerController : Controller
             return NotFound();
 
         return View(vm);
-    } 
+    }
 }

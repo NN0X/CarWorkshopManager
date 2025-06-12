@@ -8,7 +8,7 @@ namespace CarWorkshopManager.Mappers;
 public partial class UsedPartMapper
 {
     public partial UsedPart ToUsedPart(UsedPartFormViewModel vm);
-    
+
     [MapProperty(nameof(UsedPart.Part.Name), nameof(UsedPartListItemViewModel.PartName))]
     public partial UsedPartListItemViewModel ToUsedPartListItem(UsedPart usedPart);
 }

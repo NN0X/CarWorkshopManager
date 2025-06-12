@@ -18,13 +18,11 @@ public class AdminService : IAdminService
     public async Task<List<UserListItemViewModel>> GetAllUsersAsync()
     {
         var users = await _userManager.Users.ToListAsync();
-        
         var result = new List<UserListItemViewModel>();
 
         foreach (var user in users)
         {
             var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "Brak";
-            
             result.Add(new UserListItemViewModel
             {
                 Id = user.Id,
@@ -44,7 +42,7 @@ public class AdminService : IAdminService
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
             return false;
-        
+
         var currentRoles = await _userManager.GetRolesAsync(user);
         if (currentRoles.Any())
         {
@@ -52,7 +50,7 @@ public class AdminService : IAdminService
             if (!removeResult.Succeeded)
                 return false;
         }
-        
+
         var result = await _userManager.AddToRoleAsync(user, newRole);
         return result.Succeeded;
     }
@@ -62,9 +60,9 @@ public class AdminService : IAdminService
         var user = await _userManager.FindByIdAsync(userId);
         if (user is null)
         {
-            return IdentityResult.Failed(new IdentityError { Description = "Uzytkownik nie istnieje. " });
+            return IdentityResult.Failed(new IdentityError { Description = "Użytkownik nie istnieje." });
         }
-        
+
         return await _userManager.DeleteAsync(user);
     }
 
@@ -78,7 +76,7 @@ public class AdminService : IAdminService
         var existingUser = await _userManager.FindByIdAsync(updatedUser.Id);
         if (existingUser == null)
             return IdentityResult.Failed(new IdentityError { Description = "Użytkownik nie istnieje." });
-        
+
         existingUser.FirstName = updatedUser.FirstName;
         existingUser.LastName = updatedUser.LastName;
         existingUser.Email = updatedUser.Email;

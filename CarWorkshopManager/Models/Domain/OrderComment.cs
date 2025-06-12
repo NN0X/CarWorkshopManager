@@ -10,7 +10,7 @@ public class OrderComment
     [Required]
     public int ServiceOrderId { get; set; }
 
-    [Required] 
+    [Required]
     public string AuthorId { get; set; } = string.Empty;
 
     [Required]
@@ -18,7 +18,6 @@ public class OrderComment
     public string Content { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
 
     public ServiceOrder ServiceOrder { get; set; } = null!;
     public ApplicationUser Author { get; set; } = null!;

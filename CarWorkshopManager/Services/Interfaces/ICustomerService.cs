@@ -8,5 +8,4 @@ public interface ICustomerService
     Task<List<CustomerListItemViewModel>> GetAllCustomersAsync();
     Task<CustomerListItemViewModel> GetCustomerAsync(int customerId);
     Task<CustomerDetailsViewModel?> GetCustomerDetailsAsync(int customerId);
-
 }

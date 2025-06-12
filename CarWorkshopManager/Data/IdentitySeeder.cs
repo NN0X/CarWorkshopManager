@@ -18,10 +18,10 @@ public static class IdentitySeeder
                 await roleManager.CreateAsync(new IdentityRole(role));
             }
         }
-        
+
         const string adminEmail = "<ADMIN_EMAIL_REDACTED>";
         const string adminPassword = "<ADMIN_PASSWORD_REDACTED>";
-        
+
         var admin = await userManager.FindByEmailAsync(adminEmail);
         if (admin is null)
         {
@@ -33,7 +33,7 @@ public static class IdentitySeeder
                 LastName = "Admin",
                 EmailConfirmed = true
             };
-            
+
             var result = await userManager.CreateAsync(user, adminPassword);
             if (result.Succeeded)
                 await userManager.AddToRoleAsync(user, Roles.Admin);
