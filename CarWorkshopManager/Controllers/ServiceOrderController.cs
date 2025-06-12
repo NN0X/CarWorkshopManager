@@ -196,6 +196,11 @@ namespace CarWorkshopManager.Controllers
                 var soId = await _serviceTaskService.GetTaskServiceOrderServiceIdAsync(model.ServiceTaskId);
                 var vm = await _orderService.GetOrderDetailsAsync(soId);
                 await _orderService.PopulateDetailsViewModelAsync(vm, User);
+                
+                // Recompute and assign cost totals to ViewBag
+                var costTotals = await _orderService.ComputeCostTotalsAsync(soId);
+                ViewBag.CostTotals = costTotals;
+                
                 return View("Details", vm);
             }
 
