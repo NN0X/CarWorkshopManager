@@ -1,6 +1,9 @@
-
 using CarWorkshopManager.Documents;
 using CarWorkshopManager.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace CarWorkshopManager.Services.Implementations
 {
@@ -13,8 +16,8 @@ namespace CarWorkshopManager.Services.Implementations
 
         public OpenOrdersReportBackgroundService(
             IServiceScopeFactory scopeFactory,
-            ILogger<OpenOrdersReportBackgroundService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger<OpenOrdersReportBackgroundService> logger)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
@@ -25,60 +28,41 @@ namespace CarWorkshopManager.Services.Implementations
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("OpenOrdersReportBackgroundService started. Interval: {Minutes} minutes.", _intervalMinutes);
+            _logger.LogInformation("Service starting: interval={Minutes}min, adminEmail={Email}",
+                _intervalMinutes, _adminEmail);
 
             await GenerateAndSendReport(stoppingToken);
 
             while (!stoppingToken.IsCancellationRequested)
             {
+                _logger.LogInformation("Waiting {Minutes} minutes until next run", _intervalMinutes);
                 try
                 {
-                    _logger.LogInformation("Waiting {Minutes} minutes until next report.", _intervalMinutes);
                     await Task.Delay(TimeSpan.FromMinutes(_intervalMinutes), stoppingToken);
                     await GenerateAndSendReport(stoppingToken);
                 }
-                catch (TaskCanceledException)
-                {
-                    break;
-                }
+                catch (TaskCanceledException) { break; }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error during report generation or sending. Retrying in 1 minute.");
-                    try { await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); }
-                    catch { }
+                    _logger.LogError(ex, "Error in background loop, retrying in 1 minute");
+                    await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
                 }
             }
 
-            _logger.LogInformation("OpenOrdersReportBackgroundService is stopping.");
+            _logger.LogInformation("Service stopping");
         }
 
-        private async Task GenerateAndSendReport(CancellationToken cancellationToken)
+        private async Task GenerateAndSendReport(CancellationToken ct)
         {
             using var scope = _scopeFactory.CreateScope();
-            var orderService = scope.ServiceProvider.GetRequiredService<IServiceOrderService>();
-            var emailSender = scope.ServiceProvider.GetRequiredService<IEmailWithAttachmentSender>();
+            var orderSvc = scope.ServiceProvider.GetRequiredService<IServiceOrderService>();
+            var emailSvc = scope.ServiceProvider.GetRequiredService<IEmailWithAttachmentSender>();
 
-            _logger.LogInformation("Generating open orders report...");
-
-            var openOrders = await orderService.GetOpenServiceOrdersAsync();
-
-            var reportModel = new OpenOrdersReportViewModel
+            _logger.LogInformation("Generating open orders report");
+            var openOrders = await orderSvc.GetOpenServiceOrdersAsync();
+            if (!openOrders.Any())
             {
-                GeneratedAt = DateTime.Now,
-                Items = openOrders.Select(o => new OpenOrderItemViewModel
-                {
-                    ServiceOrderId = o.Id,
-                    OrderNumber = o.OrderNumber,
-                    OpenedAt = o.OpenedAt,
-                    CustomerName = o.CustomerName,
-                    RegistrationNumber = o.RegistrationNumber,
-                    Status = o.StatusName
-                }).ToList()
-            };
-
-            if (!reportModel.Items.Any())
-            {
-                _logger.LogInformation("No open orders found; skipping PDF generation and email.");
+                _logger.LogInformation("No open orders found, skipping email");
                 return;
             }
 
@@ -86,30 +70,41 @@ namespace CarWorkshopManager.Services.Implementations
             try
             {
                 using var ms = new MemoryStream();
-                var document = new OpenOrdersReportDocument(reportModel);
-                document.GeneratePdf(ms); // QuestPDF-extension
+                new OpenOrdersReportDocument(new OpenOrdersReportViewModel
+                {
+                    GeneratedAt = DateTime.Now,
+                    Items = openOrders.Select(o => new OpenOrderItemViewModel
+                    {
+                        ServiceOrderId = o.Id,
+                        OrderNumber = o.OrderNumber,
+                        OpenedAt = o.OpenedAt,
+                        CustomerName = o.CustomerName,
+                        RegistrationNumber = o.RegistrationNumber,
+                        Status = o.StatusName
+                    }).ToList()
+                }).GeneratePdf(ms);
                 pdfBytes = ms.ToArray();
+                _logger.LogInformation("PDF generated ({Bytes} bytes)", pdfBytes.Length);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to generate PDF for open orders report.");
+                _logger.LogError(ex, "Failed to generate PDF");
                 return;
             }
 
             try
             {
-                var timestamp = reportModel.GeneratedAt;
-                string subject = $"Raport otwartych zleceń – {timestamp:yyyy-MM-dd HH:mm}";
-                string htmlBody = $"<p>W załączeniu raport otwartych zleceń wygenerowany dnia {timestamp:yyyy-MM-dd HH:mm}.</p>";
-                string filename = $"open_orders_{timestamp:yyyyMMdd_HHmm}.pdf";
-                string mimeType = "application/pdf";
+                var timestamp = DateTime.Now;
+                var subject = $"Raport otwartych zleceń – {timestamp:yyyy-MM-dd HH:mm}";
+                var html = $"<p>Raport wygenerowany {timestamp:yyyy-MM-dd HH:mm}</p>";
+                var fileName = $"open_orders_{timestamp:yyyyMMdd_HHmm}.pdf";
 
-                await emailSender.SendEmailAsync(_adminEmail, subject, htmlBody, pdfBytes, filename, mimeType);
-                _logger.LogInformation("Open orders report sent to {Email}", _adminEmail);
+                await emailSvc.SendEmailAsync(_adminEmail, subject, html, pdfBytes, fileName, "application/pdf");
+                _logger.LogInformation("Email with report sent to {Email}", _adminEmail);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send email with open orders report.");
+                _logger.LogError(ex, "Failed to send report email");
             }
         }
     }

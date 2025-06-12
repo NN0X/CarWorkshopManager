@@ -1,32 +1,37 @@
 ﻿using CarWorkshopManager.Data;
-using CarWorkshopManager.Models.Domain;
 using CarWorkshopManager.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace CarWorkshopManager.Services.Implementations;
-
-public class VatRateService : IVatRateService
+namespace CarWorkshopManager.Services.Implementations
 {
-    private readonly ApplicationDbContext _db;
-
-    public VatRateService(ApplicationDbContext db)
+    public class VatRateService : IVatRateService
     {
-        _db = db;
-    }
+        private readonly ApplicationDbContext _db;
+        private readonly ILogger<VatRateService> _logger;
 
-    public async Task<SelectList> GetSelectVatRatesListAsync()
-    {
-        var list = await _db.VatRates
-            .OrderBy(v => v.Rate)
-            .AsNoTracking()
-            .ToListAsync();
-
-        var items = list.Select(v => new
+        public VatRateService(
+            ApplicationDbContext db,
+            ILogger<VatRateService> logger)
         {
-            v.Id, Display = $"{v.Rate:P0}"
-        });
+            _db = db;
+            _logger = logger;
+        }
 
-        return new SelectList(items, "Id", "Display");
+        public async Task<SelectList> GetSelectVatRatesListAsync()
+        {
+            _logger.LogInformation("GetSelectVatRatesListAsync called");
+            var list = await _db.VatRates
+                .OrderBy(v => v.Rate)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var items = list.Select(v => new { v.Id, Display = $"{v.Rate:P0}" });
+            _logger.LogInformation("GetSelectVatRatesListAsync: returning {Count} rates", list.Count);
+            return new SelectList(items, "Id", "Display");
+        }
     }
 }
