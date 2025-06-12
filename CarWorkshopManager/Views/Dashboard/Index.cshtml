@@ -28,6 +28,9 @@
     <div id="mechanicPanel" class="mb-4" style="display:@(User.IsInRole("Admin") ? "none" : "block")">
         <p><strong>PANEL MECHANIKA</strong></p>
         <p>Twoje zadania będą widoczne tutaj.</p>
+        <div class="d-grid gap-2">
+            <a asp-controller="ServiceOrder" asp-action="Index" class="btn btn-danger mb-2">Wyświetl i zarządzaj zleceniami</a>
+        </div>
     </div>
 }
 
@@ -41,6 +44,7 @@
             <a asp-controller="Customer" asp-action="Index" class="btn btn-success">Wyświetl i zarządzaj klientami</a>
             <a asp-controller="Vehicle" asp-action="Index" class="btn btn-success">Wyświetl i zarządzaj pojazdami</a>
             <a asp-controller="ServiceOrder" asp-action="Create" class="btn btn-success">Utwórz zlecenie</a>
+            <a asp-controller="ServiceOrder" asp-action="Index" class="btn btn-success">Wyświetl i zarządzaj zleceniami</a>
         </div>
     </div>
 }
