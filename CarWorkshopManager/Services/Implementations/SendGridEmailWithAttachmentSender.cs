@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using CarWorkshopManager.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -11,9 +12,14 @@ namespace CarWorkshopManager.Services.Implementations
     {
         private readonly string _apiKey;
         private readonly EmailAddress _sender;
+        private readonly ILogger<SendGridEmailWithAttachmentSender> _logger;
 
-        public SendGridEmailWithAttachmentSender(IConfiguration configuration)
+        public SendGridEmailWithAttachmentSender(
+            IConfiguration configuration,
+            ILogger<SendGridEmailWithAttachmentSender> logger)
         {
+            _logger = logger;
+
             _apiKey = configuration["SendGrid:ApiKey"]
                 ?? throw new InvalidOperationException("SendGrid API Key is missing");
             var senderEmail = configuration["SendGrid:SenderEmail"]
@@ -31,18 +37,33 @@ namespace CarWorkshopManager.Services.Implementations
             string attachmentFilename,
             string attachmentType)
         {
-            var client = new SendGridClient(_apiKey);
-            var msg = MailHelper.CreateSingleEmail(
-                _sender,
-                new EmailAddress(email),
-                subject,
-                plainTextContent: null,
-                htmlContent: htmlMessage);
+            _logger.LogInformation(
+                "SendEmailAsync called: to={Email}, subject={Subject}, attachment={Filename} ({Bytes:n0} bytes)",
+                email, subject, attachmentFilename, attachmentBytes?.LongLength ?? 0);
 
-            var base64 = Convert.ToBase64String(attachmentBytes);
-            msg.AddAttachment(attachmentFilename, base64, attachmentType);
+            try
+            {
+                var client = new SendGridClient(_apiKey);
+                var msg = MailHelper.CreateSingleEmail(
+                    _sender,
+                    new EmailAddress(email),
+                    subject,
+                    plainTextContent: null,
+                    htmlContent: htmlMessage);
 
-            await client.SendEmailAsync(msg);
+                var base64 = Convert.ToBase64String(attachmentBytes);
+                msg.AddAttachment(attachmentFilename, base64, attachmentType);
+
+                var response = await client.SendEmailAsync(msg);
+                _logger.LogInformation("SendEmailAsync: response {StatusCode}", response.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "SendEmailAsync failed: to={Email}, subject={Subject}, attachment={Filename}",
+                    email, subject, attachmentFilename);
+                throw;
+            }
         }
     }
 }

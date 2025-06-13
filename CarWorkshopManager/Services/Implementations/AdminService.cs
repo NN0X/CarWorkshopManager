@@ -3,86 +3,136 @@ using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.Admin;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-namespace CarWorkshopManager.Services.Implementations;
-
-public class AdminService : IAdminService
+namespace CarWorkshopManager.Services.Implementations
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-
-    public AdminService(UserManager<ApplicationUser> userManager)
+    public class AdminService : IAdminService
     {
-        _userManager = userManager;
-    }
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<AdminService> _logger;
 
-    public async Task<List<UserListItemViewModel>> GetAllUsersAsync()
-    {
-        var users = await _userManager.Users.ToListAsync();
-        var result = new List<UserListItemViewModel>();
-
-        foreach (var user in users)
+        public AdminService(UserManager<ApplicationUser> userManager,
+                            ILogger<AdminService> logger)
         {
-            var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "Brak";
-            result.Add(new UserListItemViewModel
+            _userManager = userManager;
+            _logger      = logger;
+        }
+
+        public async Task<List<UserListItemViewModel>> GetAllUsersAsync()
+        {
+            _logger.LogInformation("Retrieving all users");
+            var users = await _userManager.Users.ToListAsync();
+            var result = new List<UserListItemViewModel>();
+
+            foreach (var user in users)
             {
-                Id = user.Id,
-                Username = user.UserName ?? "",
-                FullName = $"{user.FirstName} {user.LastName}",
-                Email = user.Email ?? "",
-                PhoneNumber = user.PhoneNumber ?? "",
-                Role = role
-            });
+                var role = (await _userManager.GetRolesAsync(user))
+                            .FirstOrDefault() ?? "Brak";
+                result.Add(new UserListItemViewModel
+                {
+                    Id          = user.Id,
+                    Username    = user.UserName ?? "",
+                    FullName    = $"{user.FirstName} {user.LastName}",
+                    Email       = user.Email ?? "",
+                    PhoneNumber = user.PhoneNumber ?? "",
+                    Role        = role
+                });
+            }
+
+            _logger.LogInformation("Retrieved {Count} users", result.Count);
+            return result;
         }
 
-        return result;
-    }
-
-    public async Task<bool> ChangeUserRoleAsync(string userId, string newRole)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-            return false;
-
-        var currentRoles = await _userManager.GetRolesAsync(user);
-        if (currentRoles.Any())
+        public async Task<bool> ChangeUserRoleAsync(string userId, string newRole)
         {
-            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            if (!removeResult.Succeeded)
+            _logger.LogInformation("Changing role for user {UserId} to {Role}", userId, newRole);
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User not found: {UserId}", userId);
                 return false;
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (currentRoles.Any())
+            {
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                if (!removeResult.Succeeded)
+                {
+                    _logger.LogError("Failed to remove existing roles from {UserId}: {Errors}",
+                                     userId, string.Join(", ", removeResult.Errors.Select(e => e.Description)));
+                    return false;
+                }
+            }
+
+            var addResult = await _userManager.AddToRoleAsync(user, newRole);
+            if (!addResult.Succeeded)
+            {
+                _logger.LogError("Failed to add role {Role} to {UserId}: {Errors}",
+                                 newRole, userId, string.Join(", ", addResult.Errors.Select(e => e.Description)));
+            }
+            else
+            {
+                _logger.LogInformation("Role changed successfully for {UserId}", userId);
+            }
+
+            return addResult.Succeeded;
         }
 
-        var result = await _userManager.AddToRoleAsync(user, newRole);
-        return result.Succeeded;
-    }
-
-    public async Task<IdentityResult> DeleteUserAsync(string userId)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
+        public async Task<IdentityResult> DeleteUserAsync(string userId)
         {
-            return IdentityResult.Failed(new IdentityError { Description = "Użytkownik nie istnieje." });
+            _logger.LogInformation("Deleting user {UserId}", userId);
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User not found: {UserId}", userId);
+                return IdentityResult.Failed(new IdentityError { Description = "Użytkownik nie istnieje." });
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+                _logger.LogError("Failed to delete {UserId}: {Errors}",
+                                 userId, string.Join(", ", result.Errors.Select(e => e.Description)));
+            else
+                _logger.LogInformation("Deleted user {UserId}", userId);
+
+            return result;
         }
 
-        return await _userManager.DeleteAsync(user);
-    }
+        public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
+        {
+            _logger.LogInformation("Getting user by Id: {UserId}", userId);
+            return await _userManager.FindByIdAsync(userId);
+        }
 
-    public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
-    {
-        return await _userManager.FindByIdAsync(userId);
-    }
+        public async Task<IdentityResult> UpdateUserAsync(ApplicationUser updatedUser)
+        {
+            _logger.LogInformation("Updating user {UserId}", updatedUser.Id);
 
-    public async Task<IdentityResult> UpdateUserAsync(ApplicationUser updatedUser)
-    {
-        var existingUser = await _userManager.FindByIdAsync(updatedUser.Id);
-        if (existingUser == null)
-            return IdentityResult.Failed(new IdentityError { Description = "Użytkownik nie istnieje." });
+            var existing = await _userManager.FindByIdAsync(updatedUser.Id);
+            if (existing == null)
+            {
+                _logger.LogWarning("User not found: {UserId}", updatedUser.Id);
+                return IdentityResult.Failed(new IdentityError { Description = "Użytkownik nie istnieje." });
+            }
 
-        existingUser.FirstName = updatedUser.FirstName;
-        existingUser.LastName = updatedUser.LastName;
-        existingUser.Email = updatedUser.Email;
-        existingUser.NormalizedEmail = _userManager.NormalizeEmail(updatedUser.Email);
-        existingUser.PhoneNumber = updatedUser.PhoneNumber;
+            existing.FirstName       = updatedUser.FirstName;
+            existing.LastName        = updatedUser.LastName;
+            existing.Email           = updatedUser.Email;
+            existing.NormalizedEmail = _userManager.NormalizeEmail(updatedUser.Email);
+            existing.PhoneNumber     = updatedUser.PhoneNumber;
 
-        return await _userManager.UpdateAsync(existingUser);
+            var result = await _userManager.UpdateAsync(existing);
+            if (!result.Succeeded)
+                _logger.LogError("Failed to update {UserId}: {Errors}",
+                                 updatedUser.Id, string.Join(", ", result.Errors.Select(e => e.Description)));
+            else
+                _logger.LogInformation("Updated user {UserId}", updatedUser.Id);
+
+            return result;
+        }
     }
 }

@@ -1,46 +1,62 @@
 ﻿using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
-namespace CarWorkshopManager.Services.Implementations;
-
-public class UserRegistrationService : IUserRegistrationService
+namespace CarWorkshopManager.Services.Implementations
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IUsernameGeneratorService _usernameGenerator;
-
-    public UserRegistrationService(UserManager<ApplicationUser> userManager,
-        IUsernameGeneratorService usernameGenerator)
+    public class UserRegistrationService : IUserRegistrationService
     {
-        _userManager = userManager;
-        _usernameGenerator = usernameGenerator;
-    }
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUsernameGeneratorService _usernameGenerator;
+        private readonly ILogger<UserRegistrationService> _logger;
 
-    public async Task<(IdentityResult result, ApplicationUser user, string token)> 
-        RegisterUserAsync(string firstName, string lastName, string email, string? phoneNumber, string role)
-    {
-        var username = await _usernameGenerator.GenerateUsernameAsync(firstName, lastName);
-
-        var user = new ApplicationUser
+        public UserRegistrationService(
+            UserManager<ApplicationUser> userManager,
+            IUsernameGeneratorService usernameGenerator,
+            ILogger<UserRegistrationService> logger)
         {
-            UserName = username,
-            FirstName = firstName,
-            LastName = lastName,
-            Email = email,
-            PhoneNumber = phoneNumber,
-            EmailConfirmed = true
-        };
+            _userManager = userManager;
+            _usernameGenerator = usernameGenerator;
+            _logger = logger;
+        }
 
-        var createResult = await _userManager.CreateAsync(user);
-        if (!createResult.Succeeded)
-            return (createResult, null!, null!);
+        public async Task<(IdentityResult result, ApplicationUser user, string token)>
+            RegisterUserAsync(string firstName, string lastName, string email, string? phoneNumber, string role)
+        {
+            _logger.LogInformation("RegisterUserAsync called: {Email}, role={Role}", email, role);
+            var username = await _usernameGenerator.GenerateUsernameAsync(firstName, lastName);
 
-        var roleResult = await _userManager.AddToRoleAsync(user, role);
-        if (!roleResult.Succeeded)
-            return (roleResult, user, null!);
+            var user = new ApplicationUser
+            {
+                UserName = username,
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                PhoneNumber = phoneNumber,
+                EmailConfirmed = true
+            };
 
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var createResult = await _userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                _logger.LogWarning("RegisterUserAsync: CreateAsync failed for {Email}: {Errors}",
+                    email, string.Join(";", createResult.Errors.Select(e => e.Description)));
+                return (createResult, null!, null!);
+            }
 
-        return (IdentityResult.Success, user, token);
+            var roleResult = await _userManager.AddToRoleAsync(user, role);
+            if (!roleResult.Succeeded)
+            {
+                _logger.LogWarning("RegisterUserAsync: AddToRoleAsync failed for {UserId}: {Errors}",
+                    user.Id, string.Join(";", roleResult.Errors.Select(e => e.Description)));
+                return (roleResult, user, null!);
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            _logger.LogInformation("RegisterUserAsync: user created {UserId}", user.Id);
+            return (IdentityResult.Success, user, token);
+        }
     }
 }
