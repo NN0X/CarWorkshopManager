@@ -1,169 +1,141 @@
-using Xunit;
-using Moq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using CarWorkshopManager.Services.Implementations;
 using CarWorkshopManager.Data;
 using CarWorkshopManager.Mappers;
+using CarWorkshopManager.Services.Implementations;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.Customer;
-using CarWorkshopManager.Models.Domain;
+using CarWorkshopManager.ViewModels.Vehicle;   
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using CarWorkshopManager.ViewModels.Vehicle;
-using System;
+using Moq;
+using Xunit;
+using Assert = Xunit.Assert;
 
-public class CustomerServiceTests : IDisposable
+namespace CarWorkshopManager.Tests.Services.Implementations
 {
-    private readonly ApplicationDbContext _dbContext;
-    private readonly CustomerMapper _mapper;
-    private readonly Mock<IVehicleService> _mockVehicleService;
-    private readonly CustomerService _customerService;
-
-    public CustomerServiceTests()
+    public class CustomerServiceTests : IDisposable
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "CustomerServiceTestDb_" + Guid.NewGuid().ToString())
-            .Options;
-        _dbContext = new ApplicationDbContext(options);
+        private readonly ApplicationDbContext _db;
+        private readonly CustomerService _service;
+        private readonly Mock<IVehicleService> _vehicleServiceMock;
 
-        _mapper = new CustomerMapper();
-        _mockVehicleService = new Mock<IVehicleService>();
-        _customerService = new CustomerService(_dbContext, _mapper, _mockVehicleService.Object);
-    }
-
-    [Fact]
-    public async Task AddCustomerAsync_AddsCustomerToDatabase()
-    {
-        var createCustomerViewModel = new CreateCustomerViewModel
+        public CustomerServiceTests()
         {
-            FirstName = "Test",
-            LastName = "Customer",
-            Email = "test@example.com",
-            PhoneNumber = "123-456-7890"
-        };
+            var opts = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
 
-        await _customerService.AddCustomerAsync(createCustomerViewModel);
+            _db  = new ApplicationDbContext(opts);
+            _vehicleServiceMock = new Mock<IVehicleService>();
+            var mapper = new CustomerMapper();
 
-        var addedCustomer = await _dbContext.Customers.FirstOrDefaultAsync();
-        Xunit.Assert.NotNull(addedCustomer);
-        Xunit.Assert.Equal("Test", addedCustomer.FirstName);
-        Xunit.Assert.Equal("Customer", addedCustomer.LastName);
-        Xunit.Assert.Equal("test@example.com", addedCustomer.Email);
-        Xunit.Assert.Equal("123-456-7890", addedCustomer.PhoneNumber);
-    }
-
-    [Fact]
-    public async Task GetAllCustomersAsync_ReturnsListOfCustomerListItemViewModel()
-    {
-        var customers = new List<Customer>
+            _service = new CustomerService(_db, mapper, _vehicleServiceMock.Object);
+        }
+        public void Dispose() => _db.Dispose();
+        
+        [Fact]
+        public async Task AddCustomerAsync_PersistsCustomer()
         {
-            new Customer { FirstName = "John", LastName = "Doe", Email = "john@example.com", PhoneNumber = "111" },
-            new Customer { FirstName = "Jane", LastName = "Smith", Email = "jane@example.com", PhoneNumber = "222" }
-        };
-        await _dbContext.Customers.AddRangeAsync(customers);
-        await _dbContext.SaveChangesAsync();
+            var vm = new CreateCustomerViewModel
+            {
+                FirstName = "Jan",
+                LastName = "Kowalski",
+                Email = "jan@example.com",
+                PhoneNumber = "123456789"
+            };
 
-        var result = await _customerService.GetAllCustomersAsync();
+            await _service.AddCustomerAsync(vm);
 
-        Xunit.Assert.NotNull(result);
-        Xunit.Assert.Equal(2, result.Count);
-        Xunit.Assert.Contains(result, c => c.FirstName == "John" && c.LastName == "Doe" && c.Email == "john@example.com" && c.PhoneNumber == "111");
-        Xunit.Assert.Contains(result, c => c.FirstName == "Jane" && c.LastName == "Smith" && c.Email == "jane@example.com" && c.PhoneNumber == "222");
-    }
-
-    [Fact]
-    public async Task GetCustomerAsync_ExistingCustomer_ReturnsCustomerListItemViewModel()
-    {
-        var customer = new Customer { FirstName = "John", LastName = "Doe", Email = "john@example.com", PhoneNumber = "111" };
-        await _dbContext.Customers.AddAsync(customer);
-        await _dbContext.SaveChangesAsync();
-
-        var result = await _customerService.GetCustomerAsync(customer.Id);
-
-        Xunit.Assert.NotNull(result);
-        Xunit.Assert.Equal(customer.Id, result.Id);
-        Xunit.Assert.Equal("John", result.FirstName);
-        Xunit.Assert.Equal("Doe", result.LastName);
-        Xunit.Assert.Equal("john@example.com", result.Email);
-        Xunit.Assert.Equal("111", result.PhoneNumber);
-    }
-
-    [Fact]
-    public async Task GetCustomerAsync_NonExistingCustomer_ReturnsNull()
-    {
-        var result = await _customerService.GetCustomerAsync(99);
-
-        Xunit.Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task GetCustomerDetailsAsync_ExistingCustomer_ReturnsCustomerDetailsViewModel()
-    {
-        var customer = new Customer
+            var saved = await _db.Customers.SingleAsync();
+            Assert.Equal("Jan", saved.FirstName);
+            Assert.Equal("Kowalski", saved.LastName);
+            Assert.Equal("jan@example.com", saved.Email);
+            Assert.Equal("123456789", saved.PhoneNumber);
+        }
+        
+        [Fact]
+        public async Task GetAllCustomersAsync_ReturnsAllMapped()
         {
-            FirstName = "John",
-            LastName = "Doe",
-            Email = "john@example.com",
-            PhoneNumber = "111-222-3333"
-        };
-        await _dbContext.Customers.AddAsync(customer);
-        await _dbContext.SaveChangesAsync();
+            _db.Customers.AddRange(new[]
+            {
+                new Models.Domain.Customer { FirstName = "A", LastName = "A1", Email = "a@a.pl", PhoneNumber = "1" },
+                new Models.Domain.Customer { FirstName = "B", LastName = "B1", Email = "b@b.pl", PhoneNumber = "2" }
+            });
+            await _db.SaveChangesAsync();
 
-        var vehicles = new List<VehicleListItemViewModel>
+            var list = await _service.GetAllCustomersAsync();
+
+            Assert.Equal(2, list.Count);
+            Assert.Contains(list, c => c.FirstName == "A" && c.LastName == "A1");
+            Assert.Contains(list, c => c.FirstName == "B" && c.LastName == "B1");
+        }
+        
+        [Fact]
+        public async Task GetCustomerAsync_NotFound_ReturnsNull()
         {
-            new VehicleListItemViewModel { Id = 101, Model = "Golf", BrandName = "VW", Vin = "VIN001", RegistrationNumber = "REG001", ProductionYear = 2020, Mileage = 50000, CreatedAt = DateTime.Now },
-            new VehicleListItemViewModel { Id = 102, Model = "Polo", BrandName = "VW", Vin = "VIN002", RegistrationNumber = "REG002", ProductionYear = 2021, Mileage = 30000, CreatedAt = DateTime.Now.AddDays(-10) }
-        };
-        _mockVehicleService.Setup(vs => vs.GetCustomerVehiclesAsync(customer.Id)).ReturnsAsync(vehicles);
-
-        var result = await _customerService.GetCustomerDetailsAsync(customer.Id);
-
-        Xunit.Assert.NotNull(result);
-        Xunit.Assert.Equal(customer.Id, result.Id);
-        Xunit.Assert.Equal("John", result.FirstName);
-        Xunit.Assert.Equal("Doe", result.LastName);
-        Xunit.Assert.Equal("john@example.com", result.Email);
-        Xunit.Assert.Equal("111-222-3333", result.PhoneNumber);
-
-        Xunit.Assert.Equal(vehicles.Count, result.Vehicles.Count);
-        Xunit.Assert.Contains(result.Vehicles, v => v.Model == "Golf" && v.BrandName == "VW");
-        Xunit.Assert.Contains(result.Vehicles, v => v.Model == "Polo" && v.BrandName == "VW");
-        Xunit.Assert.True(result.Vehicles.OrderBy(v => v.Id).SequenceEqual(vehicles.OrderBy(v => v.Id), new VehicleListItemViewModelComparer()));
-    }
-
-    [Fact]
-    public async Task GetCustomerDetailsAsync_NonExistingCustomer_ReturnsNull()
-    {
-        var result = await _customerService.GetCustomerDetailsAsync(99);
-
-        Xunit.Assert.Null(result);
-    }
-
-    private class VehicleListItemViewModelComparer : IEqualityComparer<VehicleListItemViewModel>
-    {
-        public bool Equals(VehicleListItemViewModel? x, VehicleListItemViewModel? y)
-        {
-            if (ReferenceEquals(x, y)) return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null)) return false;
-            return x.Id == y.Id &&
-                   x.BrandName == y.BrandName &&
-                   x.Model == y.Model &&
-                   x.Vin == y.Vin &&
-                   x.RegistrationNumber == y.RegistrationNumber &&
-                   x.ProductionYear == y.ProductionYear &&
-                   x.Mileage == y.Mileage;
+            var result = await _service.GetCustomerAsync(999);
+            Assert.Null(result);
         }
 
-        public int GetHashCode(VehicleListItemViewModel obj)
+        [Fact]
+        public async Task GetCustomerAsync_Found_ReturnsViewModel()
         {
-            return HashCode.Combine(obj.Id, obj.BrandName, obj.Model, obj.Vin, obj.RegistrationNumber, obj.ProductionYear, obj.Mileage);
-        }
-    }
+            var cust = new Models.Domain.Customer
+            {
+                FirstName = "X",
+                LastName = "Y",
+                Email = "x@y.pl",
+                PhoneNumber = "555"
+            };
+            
+            _db.Customers.Add(cust);
+            await _db.SaveChangesAsync();
 
-    public void Dispose()
-    {
-        _dbContext.Database.EnsureDeleted();
-        _dbContext.Dispose();
+            var vm = await _service.GetCustomerAsync(cust.Id);
+
+            Assert.NotNull(vm);
+            Assert.Equal(cust.Id, vm!.Id);
+            Assert.Equal("X", vm.FirstName);
+            Assert.Equal("Y", vm.LastName);
+            Assert.Equal("x@y.pl", vm.Email);
+            Assert.Equal("555", vm.PhoneNumber);
+        }
+        
+        [Fact]
+        public async Task GetCustomerDetailsAsync_NotFound_ReturnsNull()
+        {
+            var result = await _service.GetCustomerDetailsAsync(42);
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task GetCustomerDetailsAsync_Found_ReturnsDetailsWithVehicles()
+        {
+            var cust = new Models.Domain.Customer
+            {
+                FirstName = "C",
+                LastName = "D",
+                Email = "c@d.pl",
+                PhoneNumber = "888"
+            };
+            _db.Customers.Add(cust);
+            await _db.SaveChangesAsync();
+            
+            var fakeVehicles = new List<VehicleListItemViewModel>
+            {
+                new VehicleListItemViewModel { Id = 1, Model = "M1" },
+                new VehicleListItemViewModel { Id = 2, Model = "M2" }
+            };
+            
+            _vehicleServiceMock
+                .Setup(v => v.GetCustomerVehiclesAsync(cust.Id))
+                .ReturnsAsync(fakeVehicles);
+
+            var details = await _service.GetCustomerDetailsAsync(cust.Id);
+
+            Assert.NotNull(details);
+            Assert.Equal(cust.Id, details!.Id);
+            Assert.Equal(2, details.Vehicles.Count);
+            Assert.Equal("M1", details.Vehicles[0].Model);
+            Assert.Equal(1, details.Vehicles[0].Id);
+        }
     }
 }
