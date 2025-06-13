@@ -3,15 +3,14 @@ using CarWorkshopManager.Mappers;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.Customer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace CarWorkshopManager.Services.Implementations
 {
     public class CustomerService : ICustomerService
     {
         private readonly ApplicationDbContext _db;
-        private readonly CustomerMapper     _mapper;
-        private readonly IVehicleService    _vehicleService;
+        private readonly CustomerMapper _mapper;
+        private readonly IVehicleService _vehicleService;
         private readonly ILogger<CustomerService> _logger;
 
         public CustomerService(
@@ -78,12 +77,12 @@ namespace CarWorkshopManager.Services.Implementations
 
             return new CustomerDetailsViewModel
             {
-                Id          = customer.Id,
-                FirstName   = customer.FirstName,
-                LastName    = customer.LastName,
-                Email       = customer.Email,
+                Id = customer.Id,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Email = customer.Email,
                 PhoneNumber = customer.PhoneNumber,
-                Vehicles    = vehicles
+                Vehicles = vehicles
             };
         }
     }

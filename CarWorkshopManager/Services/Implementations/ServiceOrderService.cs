@@ -145,7 +145,7 @@ namespace CarWorkshopManager.Services.Implementations
             vm.NewUsedPart = new UsedPartFormViewModel();
             vm.NewCommentContent = string.Empty;
             vm.WorkRates = await _workRateService.GetSelectWorkRatesAsync();
-            vm.Parts     = await _partService.GetActivePartsSelectAsync();
+            vm.Parts = await _partService.GetActivePartsSelectAsync();
             vm.Mechanics = new SelectList(
                 await _userManager.GetUsersInRoleAsync(Roles.Mechanic),
                 "Id", "UserName");
@@ -171,7 +171,7 @@ namespace CarWorkshopManager.Services.Implementations
             if (month.HasValue)
             {
                 var from = new DateTime(month.Value.Year, month.Value.Month, 1);
-                var to   = from.AddMonths(1);
+                var to = from.AddMonths(1);
                 query = query.Where(o => o.OpenedAt >= from && o.OpenedAt < to);
             }
 
@@ -202,8 +202,8 @@ namespace CarWorkshopManager.Services.Implementations
             {
                 Month = month,
                 VehicleId = vehicleId,
-                Vehicles  = new SelectList(vehicles, "Value", "Text", vehicleId),
-                Items     = items
+                Vehicles = new SelectList(vehicles, "Value", "Text", vehicleId),
+                Items = items
             };
         }
 
@@ -211,7 +211,7 @@ namespace CarWorkshopManager.Services.Implementations
         {
             _logger.LogInformation("GetMonthlyRepairSummaryAsync called for {Month}", month);
             var from = new DateTime(month.Year, month.Month, 1);
-            var to   = from.AddMonths(1);
+            var to = from.AddMonths(1);
             var data = await _db.ServiceOrders
                 .Where(o => o.OpenedAt >= from && o.OpenedAt < to && o.Status.Name != OrderStatuses.Completed)
                 .Select(o => new

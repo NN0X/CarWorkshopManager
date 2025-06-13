@@ -5,6 +5,8 @@ using CarWorkshopManager.ViewModels.Part;
 using CarWorkshopManager.Models.Domain;           
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using Assert = Xunit.Assert;
 
@@ -21,7 +23,7 @@ namespace CarWorkshopManager.Tests.Services.Implementations
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
             _db = new ApplicationDbContext(opts);
-            _service = new PartService(_db, new PartMapper());
+            _service = new PartService(_db, new PartMapper(), NullLogger<PartService>.Instance);
         }
 
         public void Dispose() => _db.Dispose();
