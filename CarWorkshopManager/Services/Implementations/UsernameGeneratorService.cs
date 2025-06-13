@@ -1,8 +1,6 @@
 ﻿using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace CarWorkshopManager.Services.Implementations
 {
