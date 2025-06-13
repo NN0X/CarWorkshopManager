@@ -1,9 +1,6 @@
 using CarWorkshopManager.Data;
 using CarWorkshopManager.Models.Domain;
 using CarWorkshopManager.Services.Interfaces;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace CarWorkshopManager.Services.Implementations
 {

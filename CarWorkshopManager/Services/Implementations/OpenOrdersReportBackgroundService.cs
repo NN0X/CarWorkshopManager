@@ -1,9 +1,5 @@
 using CarWorkshopManager.Documents;
 using CarWorkshopManager.Services.Interfaces;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace CarWorkshopManager.Services.Implementations
 {

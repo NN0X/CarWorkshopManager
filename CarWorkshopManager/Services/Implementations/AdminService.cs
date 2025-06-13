@@ -3,7 +3,6 @@ using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.Admin;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace CarWorkshopManager.Services.Implementations
 {

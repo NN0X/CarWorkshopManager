@@ -1,18 +1,12 @@
 ﻿using CarWorkshopManager.Constants;
 using CarWorkshopManager.Data;
 using CarWorkshopManager.Mappers;
-using CarWorkshopManager.Models.Domain;
 using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.ServiceTasks;
 using CarWorkshopManager.ViewModels.UsedPart;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CarWorkshopManager.Services.Implementations
 {
