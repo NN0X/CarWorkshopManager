@@ -5,6 +5,7 @@ using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.Customer;
 using CarWorkshopManager.ViewModels.Vehicle;   
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 using Assert = Xunit.Assert;
@@ -27,7 +28,7 @@ namespace CarWorkshopManager.Tests.Services.Implementations
             _vehicleServiceMock = new Mock<IVehicleService>();
             var mapper = new CustomerMapper();
 
-            _service = new CustomerService(_db, mapper, _vehicleServiceMock.Object);
+            _service = new CustomerService(_db, mapper, _vehicleServiceMock.Object, NullLogger<CustomerService>.Instance);
         }
         public void Dispose() => _db.Dispose();
         

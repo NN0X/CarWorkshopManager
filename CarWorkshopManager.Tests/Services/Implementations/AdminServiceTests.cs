@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Moq;
 using Xunit;
 using Assert = Xunit.Assert;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CarWorkshopManager.Tests.Services.Implementations
 {
@@ -17,7 +18,7 @@ namespace CarWorkshopManager.Tests.Services.Implementations
             var store = new Mock<IUserStore<ApplicationUser>>();
             _userManagerMock = new Mock<UserManager<ApplicationUser>>(
                 store.Object, null, null, null, null, null, null, null, null);
-            _adminService = new AdminService(_userManagerMock.Object);
+            _adminService = new AdminService(_userManagerMock.Object, NullLogger<AdminService>.Instance); 
         }
 
         [Fact]

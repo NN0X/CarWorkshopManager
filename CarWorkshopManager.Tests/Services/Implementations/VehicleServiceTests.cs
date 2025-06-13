@@ -7,6 +7,7 @@ using CarWorkshopManager.ViewModels.Vehicle;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 using Assert = Xunit.Assert;
@@ -33,7 +34,7 @@ namespace CarWorkshopManager.Tests.Services.Implementations
             envMock.SetupGet(e => e.WebRootPath).Returns(_tempRoot);
 
             var mapper = new VehicleMapper();
-            _service = new VehicleService(_db, envMock.Object, mapper);
+            _service = new VehicleService(_db, envMock.Object, mapper, NullLogger<VehicleService>.Instance);
         }
 
         public void Dispose()
