@@ -35,3 +35,11 @@ Login credentials are stored in cookies, so if you close the page and reopen it,
 The project uses GitHub Actions. The workflow is defined in `.github/workflows/dotnet-pr.yml`. It includes steps for building the project and running tests. This workflow is triggered on pull requests to the `main` branch.
 
 I host Github Runner on my server.
+
+## License
+
+Car Workshop Manager is under [Apache 2.0](LICENSE.md) license and [Common Clause](NOTICE.md).
+
+### Commercial use
+
+Commercial use is not allowed as stated in the Common Clause. If you want to use Car Workshop Manager for commercial purposes, please contact any of the persons listed in the [NOTICE](NOTICE.md) file.
