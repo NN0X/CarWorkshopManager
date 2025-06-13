@@ -32,9 +32,9 @@ namespace CarWorkshopManager.Services.Implementations
             var comment = new OrderComment
             {
                 ServiceOrderId = serviceOrderId,
-                AuthorId       = authorId,
-                Content        = content,
-                CreatedAt      = DateTime.UtcNow
+                AuthorId = authorId,
+                Content = content,
+                CreatedAt = DateTime.UtcNow
             };
 
             _db.OrderComments.Add(comment);
