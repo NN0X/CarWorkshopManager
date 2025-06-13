@@ -1,6 +1,7 @@
 using Xunit;
 using Moq;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging.Abstractions;
 using CarWorkshopManager.Services.Implementations;
 using CarWorkshopManager.Models.Identity;
 using CarWorkshopManager.Services.Interfaces;
@@ -17,7 +18,8 @@ public class UserRegistrationServiceTests
         var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
         _mockUsernameGenerator = new Mock<IUsernameGeneratorService>();
-        _userRegistrationService = new UserRegistrationService(_mockUserManager.Object, _mockUsernameGenerator.Object);
+        _userRegistrationService = new UserRegistrationService(_mockUserManager.Object, _mockUsernameGenerator.Object, 
+            NullLogger<UserRegistrationService>.Instance);
     }
 
     [Fact]

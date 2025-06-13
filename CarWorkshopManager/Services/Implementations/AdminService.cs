@@ -16,7 +16,7 @@ namespace CarWorkshopManager.Services.Implementations
                             ILogger<AdminService> logger)
         {
             _userManager = userManager;
-            _logger      = logger;
+            _logger = logger;
         }
 
         public async Task<List<UserListItemViewModel>> GetAllUsersAsync()
@@ -31,12 +31,12 @@ namespace CarWorkshopManager.Services.Implementations
                             .FirstOrDefault() ?? "Brak";
                 result.Add(new UserListItemViewModel
                 {
-                    Id          = user.Id,
-                    Username    = user.UserName ?? "",
-                    FullName    = $"{user.FirstName} {user.LastName}",
-                    Email       = user.Email ?? "",
+                    Id = user.Id,
+                    Username = user.UserName ?? "",
+                    FullName = $"{user.FirstName} {user.LastName}",
+                    Email = user.Email ?? "",
                     PhoneNumber = user.PhoneNumber ?? "",
-                    Role        = role
+                    Role = role
                 });
             }
 
@@ -119,11 +119,11 @@ namespace CarWorkshopManager.Services.Implementations
                 return IdentityResult.Failed(new IdentityError { Description = "Użytkownik nie istnieje." });
             }
 
-            existing.FirstName       = updatedUser.FirstName;
-            existing.LastName        = updatedUser.LastName;
-            existing.Email           = updatedUser.Email;
+            existing.FirstName = updatedUser.FirstName;
+            existing.LastName = updatedUser.LastName;
+            existing.Email = updatedUser.Email;
             existing.NormalizedEmail = _userManager.NormalizeEmail(updatedUser.Email);
-            existing.PhoneNumber     = updatedUser.PhoneNumber;
+            existing.PhoneNumber = updatedUser.PhoneNumber;
 
             var result = await _userManager.UpdateAsync(existing);
             if (!result.Succeeded)

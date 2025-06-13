@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 using CarWorkshopManager.Constants;
 using CarWorkshopManager.Documents;
 using CarWorkshopManager.Services.Interfaces;
@@ -10,7 +7,6 @@ using CarWorkshopManager.ViewModels.ServiceTasks;
 using CarWorkshopManager.ViewModels.UsedPart;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using QuestPDF.Fluent;
 
 namespace CarWorkshopManager.Controllers
@@ -96,12 +92,12 @@ namespace CarWorkshopManager.Controllers
             await _orderService.PopulateDetailsViewModelAsync(vm, User);
             var (laborNet, laborVat, partsNet, partsVat) = await _orderService.GetOrderTotalsAsync(id);
 
-            ViewBag.LaborNet   = laborNet;
-            ViewBag.LaborVat   = laborVat;
-            ViewBag.PartsNet   = partsNet;
-            ViewBag.PartsVat   = partsVat;
-            ViewBag.TotalNet   = laborNet + partsNet;
-            ViewBag.TotalVat   = laborVat + partsVat;
+            ViewBag.LaborNet = laborNet;
+            ViewBag.LaborVat = laborVat;
+            ViewBag.PartsNet = partsNet;
+            ViewBag.PartsVat = partsVat;
+            ViewBag.TotalNet = laborNet + partsNet;
+            ViewBag.TotalVat = laborVat + partsVat;
 
             return View(vm);
         }
