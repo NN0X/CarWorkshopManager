@@ -8,6 +8,7 @@ using CarWorkshopManager.Services.Interfaces;
 using CarWorkshopManager.ViewModels.ServiceOrder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 using Assert = Xunit.Assert;
@@ -37,7 +38,8 @@ namespace CarWorkshopManager.Tests.Services.Implementations
             var partSvcMock = new Mock<IPartService>();
             var userManagerMock = MockUserManager();
 
-            _service = new ServiceOrderService(_db, mapper, workRateSvcMock.Object, partSvcMock.Object, userManagerMock.Object);
+            _service = new ServiceOrderService(_db, mapper, workRateSvcMock.Object, partSvcMock.Object, 
+                userManagerMock.Object, NullLogger<ServiceOrderService>.Instance);
         }
 
         private static Mock<UserManager<ApplicationUser>> MockUserManager()
