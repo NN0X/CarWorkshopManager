@@ -213,7 +213,7 @@ namespace CarWorkshopManager.Services.Implementations
             var from = new DateTime(month.Year, month.Month, 1);
             var to   = from.AddMonths(1);
             var data = await _db.ServiceOrders
-                .Where(o => o.OpenedAt >= from && o.OpenedAt < to && o.Status.Name == OrderStatuses.Completed)
+                .Where(o => o.OpenedAt >= from && o.OpenedAt < to && o.Status.Name != OrderStatuses.Completed)
                 .Select(o => new
                 {
                     o.CustomerNameSnapshot,
