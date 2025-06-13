@@ -1,6 +1,6 @@
 # Car Workshop Management System
 
--> HERE OPIS <-
+Application for managing a car workshop, including customer management, order management, and user management. Allows for tracking of customer cars and orders together with car parts.
 
 ## Logging in
 
